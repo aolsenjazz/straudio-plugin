@@ -1,0 +1,3 @@
+#define SIGNAL_PORT 4443
+#define HTTP_PORT 3000
+
