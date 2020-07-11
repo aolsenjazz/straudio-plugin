@@ -1,3 +1,3 @@
 #define USE_TLS 0
-#define SIGNAL_HOST "localhost"
-#define HTTP_HOST "localhost"
+#define SIGNAL_HOST "192.168.86.241"
+#define HTTP_HOST "192.168.86.241"

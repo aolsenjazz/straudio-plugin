@@ -118,7 +118,7 @@
     <IntDir>$(SolutionDir)build-win\app\$(Platform)\$(Configuration)\int\</IntDir>
     <LinkIncremental />
     <LibraryPath>$(SolutionDir)include;$(LibraryPath)</LibraryPath>
-    <IncludePath>$(SolutionDir);$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)config\debug;$(SolutionDir)config;$(SolutionDir)include;$(SolutionDir);$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(SolutionDir)build-win\app\$(Platform)\$(Configuration)\</OutDir>
@@ -170,7 +170,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_WIN32_WINNT=0x0601;$(APP_DEFS);$(DEBUG_DEFS);$(EXTRA_DEBUG_DEFS);%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)include;$(APP_INC_PATHS);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)config\debug;$(SolutionDir)config;$(SolutionDir)include;$(APP_INC_PATHS);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -340,11 +340,15 @@
     <ClInclude Include="..\..\..\iPlug2\IPlug\IPlugUtilities.h" />
     <ClInclude Include="..\..\..\iPlug2\IPlug\IPlug_include_in_plug_hdr.h" />
     <ClInclude Include="..\..\..\iPlug2\IPlug\IPlug_include_in_plug_src.h" />
+    <ClInclude Include="..\config\debug\build_config.h" />
+    <ClInclude Include="..\config\release\build_config.h" />
+    <ClInclude Include="..\config\shared_config.h" />
     <ClInclude Include="..\HttpClient.h" />
     <ClInclude Include="..\lib\cfgpath.h" />
     <ClInclude Include="..\lib\httplib.h" />
     <ClInclude Include="..\lib\json.hpp" />
     <ClInclude Include="..\logger.h" />
+    <ClInclude Include="..\new_signal_service.h" />
     <ClInclude Include="..\Preferences.h" />
     <ClInclude Include="..\Straudio.h" />
     <ClInclude Include="..\resources\resource.h" />
@@ -442,12 +446,9 @@
     <Image Include="..\resources\Straudio.ico" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\config\Straudio-ios.xcconfig" />
-    <None Include="..\config\Straudio-web.mk" />
     <None Include="..\config\Straudio-win.props">
       <SubType>Designer</SubType>
     </None>
-    <None Include="..\config\Straudio-mac.xcconfig" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

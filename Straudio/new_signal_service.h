@@ -50,6 +50,7 @@ private:
 	void onRejoinResponse(nlohmann::json j) { Loggy::info("Rejoined room"); }
 	
 	void onCreateRoomResponse(nlohmann::json j) {
+		Loggy::info("create response!!!!");
 		bool success = j["success"].get<bool>();
 		Room r(j["room"]);
 		
@@ -89,9 +90,8 @@ public:
 		
 		std::ostringstream os;
 		os << (USE_TLS ? "wss://" : "ws://") << SIGNAL_HOST << ":" << SIGNAL_PORT << "/";
-		
 		url = os.str();
-		
+
 		_ws = std::make_shared<rtc::WebSocket>();
 		connect();
 	}
@@ -110,8 +110,7 @@ public:
 			{"displayName", "Host"},
 			{"method", "createRoom"}
 		};
-		
-		Loggy::info("Sending createRoom request");
+
 		_ws->send(j.dump());
 	}
 };

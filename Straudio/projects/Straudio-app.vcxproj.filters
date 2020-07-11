@@ -301,6 +301,16 @@
     <ClInclude Include="..\lib\httplib.h" />
     <ClInclude Include="..\lib\json.hpp" />
     <ClInclude Include="..\logger.h" />
+    <ClInclude Include="..\new_signal_service.h" />
+    <ClInclude Include="..\config\shared_config.h">
+      <Filter>config</Filter>
+    </ClInclude>
+    <ClInclude Include="..\config\debug\build_config.h">
+      <Filter>config\debug</Filter>
+    </ClInclude>
+    <ClInclude Include="..\config\release\build_config.h">
+      <Filter>config\release</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="resources">
@@ -333,6 +343,12 @@
     <Filter Include="IPlug\APP\RTAudioMidi\include">
       <UniqueIdentifier>{649c5de3-b4c2-4de9-8d57-3b1762646259}</UniqueIdentifier>
     </Filter>
+    <Filter Include="config\debug">
+      <UniqueIdentifier>{499aeb48-339c-4bd1-9179-3365aabaf5d4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="config\release">
+      <UniqueIdentifier>{595cfaf8-6fe4-4ccd-8467-f29811974d77}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\resources\main.rc">
@@ -340,15 +356,6 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\config\Straudio-ios.xcconfig">
-      <Filter>config</Filter>
-    </None>
-    <None Include="..\config\Straudio-web.mk">
-      <Filter>config</Filter>
-    </None>
-    <None Include="..\config\Straudio-mac.xcconfig">
-      <Filter>config</Filter>
-    </None>
     <None Include="..\config\Straudio-win.props">
       <Filter>config</Filter>
     </None>
