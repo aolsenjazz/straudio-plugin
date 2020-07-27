@@ -2,13 +2,16 @@
 
 #include "IPlug_include_in_plug_hdr.h"
 #include "web_services_manager.h"
+#include "upload_bufferer.h"
 #include "domain.h"
+#include "logger_init.h"
 
-const int kNumPrograms = 0;
+int kNumPrograms = 0;
 
 enum EParams {
     kMonitor = 0,
 	kStream = 1,
+	kUploadBufferSize = 2,
     kNumParams
 };
 
@@ -20,19 +23,23 @@ public:
 	void OnReset() override;
 	void OnUIOpen() override;
 	void OnUIClose() override;
-	void OnRestoreState() override;
-	void OnHostIdentified() override;
-	void OnIdle() override;
 	void OnActivate(bool active) override;
-	
-	~Straudio();
+	void OnParamChange(int paramIdx) override;
 	
 private:
-	void onLoginSuccess();
-	bool uiOpen = false;
-	void initStream();
-	void onConnectionChange(std::string connectionState);
-	void onRoomChange(std::string roomState, Room r);
+	void signalStateChange();
+	void roomStateChange();
 	void onError(std::string severity, std::string message);
-	WebServicesManager* wsm;
+	
+	void sendPcmData(float* data, size_t size);
+	void onBufferReady(int sampleRate, int nChans, int batchSize, int bufferSize);
+	
+	std::unique_ptr<WebServicesManager> wsm;
+	std::unique_ptr<PcmUploadBuffer> uploadBuffer;
+	
+	std::shared_ptr<Room> room = Room::CLOSED_PTR();
+	std::shared_ptr<std::string> signalState = std::make_shared<std::string>("closed");
+	
+	std::unique_ptr<std::string> roomMsg = std::make_unique<std::string>("Creating room...");
+	bool uiOpen;
 };

@@ -4,34 +4,36 @@
 #include "Straudio.h"
 #include "IPlug_include_in_plug_src.h"
 #include "IControls.h"
-#include <iostream>
-#include <cstdint>
-#include "HttpClient.h"
+
 #include "ui/LoginPanel.h"
 #include "ui/AudioInfoPanel.h"
-#include "ui/MonitorControl.h"
-#include "ui/StreamControl.h"
-//#include "util/debug_socket.h"
-#include "logger.h"
-//#include "rtc/rtc.hpp"
-#include "shared_config.h"
-#include "build_config.h"
 #include "web_services_manager.h"
-#include "domain.h"
+#include "audio_propagator.h"
+#include "upload_bufferer.h"
 
 using namespace std::placeholders;
 
-Straudio::Straudio(const iplug::InstanceInfo& info) : iplug::Plugin(info, iplug::MakeConfig(kNumParams, kNumPrograms)) {
+Straudio::Straudio(const iplug::InstanceInfo& info)
+: iplug::Plugin(info, iplug::MakeConfig(kNumParams, kNumPrograms)) {
 	GetParam(kMonitor)->InitBool("Monitor", false);
-	GetParam(kMonitor)->InitBool("Stream", false);
+	GetParam(kStream)->InitBool("Stream", true);
+	GetParam(kUploadBufferSize)->InitEnum("UploadBufferSize", 2, 6, "", iplug::IParam::kFlagsNone,
+										  "", "256", "512", "1024", "2048", "4096", "8192");
 
-	wsm = new WebServicesManager(std::bind(&Straudio::onConnectionChange, this, _1),
-								 std::bind(&Straudio::onRoomChange, this, _1, _2),
-								 std::bind(&Straudio::onError, this, _1, _2));
-	// Make services
-//	ss = new SignalService("ws://192.168.86.241:4443/",
-//						   std::bind(&Straudio::onClientDescription, this, std::placeholders::_1, std::placeholders::_2),
-//						   std::bind(&Straudio::onClientCandidate, this, std::placeholders::_1, std::placeholders::_2));
+	auto boundSigStateChange = std::bind(&Straudio::signalStateChange, this);
+	auto boundRoomStateChange = std::bind(&Straudio::roomStateChange, this);
+	auto boundOnError = std::bind(&Straudio::onError, this, _1, _2);
+	wsm = std::make_unique<WebServicesManager>(room, signalState, boundSigStateChange,
+											   boundRoomStateChange, boundOnError);
+	
+	auto boundSendPcm = std::bind(&Straudio::sendPcmData, this, _1, _2);
+	auto boundUpdateAudio = std::bind(&Straudio::onBufferReady, this, _1, _2, _3, _4);
+	uploadBuffer = std::make_unique<PcmUploadBuffer>(boundSendPcm, boundUpdateAudio, GetSampleRate(),
+													 GetParam(kUploadBufferSize)->Int());
+	
+	Preferences::setAuth("bar");
+	
+	wsm->connectToSignalling();
 	
 	mMakeGraphicsFunc = [&]() {
 		return MakeGraphics(*this, PLUG_WIDTH, PLUG_HEIGHT, PLUG_FPS, GetScaleForScreen(PLUG_HEIGHT));
@@ -43,132 +45,100 @@ Straudio::Straudio(const iplug::InstanceInfo& info) : iplug::Plugin(info, iplug:
 		pGraphics->LoadFont("Roboto-Regular", ROBOTO_FN);
 		const iplug::igraphics::IRECT root = pGraphics->GetBounds();
 		const iplug::igraphics::IRECT streamCtrlRect = root.GetFromBLHC(250, 100);
+		const iplug::igraphics::IRECT monitorCtrlRect = root.GetFromBRHC(250, 100);
 
 		// Interface elements
-		LoginPanel loginPanel(pGraphics, std::bind(&Straudio::onLoginSuccess, this));
+//		LoginPanel loginPanel(pGraphics, std::bind(&Straudio::onLoginSuccess, this));
 		
-  		pGraphics->AttachControl(new iplug::igraphics::ITextControl(root.GetMidVPadded(50), "Hello iPlug 2!", iplug::igraphics::IText(50)));
-		pGraphics->AttachControl(new iplug::igraphics::IVToggleControl(streamCtrlRect, std::bind(&Straudio::initStream, this), "Stream", iplug::igraphics::DEFAULT_STYLE, "Off", "On", false));
+		pGraphics->AttachControl(new iplug::igraphics::ITextControl(root.GetMidVPadded(50), roomMsg->c_str(), iplug::igraphics::IText(50)), 69);
+//		pGraphics->AttachControl(new iplug::igraphics::IVToggleControl(streamCtrlRect, std::bind(&Straudio::initStream, this), "Stream", iplug::igraphics::DEFAULT_STYLE, "Off", "On", false));
+		
+		pGraphics->AttachControl(new iplug::igraphics::ICaptionControl(streamCtrlRect, kUploadBufferSize, iplug::igraphics::IText(24.f), iplug::igraphics::DEFAULT_FGCOLOR, false), 80085, "misccontrols");
+		
+		pGraphics->AttachControl(new iplug::igraphics::IVToggleControl(monitorCtrlRect, kMonitor, "Monitor", iplug::igraphics::DEFAULT_STYLE, "Off", "On"));
 	  };
 }
 
-void Straudio::onRoomChange(std::string roomState, Room r) {
-	Loggy::info("Room state change. New state: " + roomState);
-	Loggy::info(r.toString());
+void Straudio::roomStateChange() {
+	PLOG_INFO << "Room state change. State:" << room->toString();
+	
+	std::string msg = "Creating room...";
+	if (room->state == "open") {
+		std::ostringstream os;
+		os << "Room ID: " << room->rId;
+		msg = os.str();
+	}
+	
+	roomMsg.reset(new std::string(msg));
+	
+	if (GetUI()) {
+		// refactor this nonsense (carefully, when you have the time)
+		char const *formatted = roomMsg->c_str();
+		((iplug::igraphics::ITextControl*) GetUI()->GetControlWithTag(69))->SetStr(formatted);
+	}
 }
 
-void Straudio::onConnectionChange(std::string connectionState) {
-	Loggy::info("Connection state change. New state: " + connectionState);
+void Straudio::signalStateChange() {
+	PLOG_INFO << "Connection state change. State: " << *signalState;
+	
+	if (*signalState == "open") {
+		wsm->ss->createRoom(uploadBuffer->sampleRate, uploadBuffer->nChannels, uploadBuffer->batchSize);
+	} else {
+		wsm->closePeerConnections(); // something happened with the connection. close peer connections
+	}
 }
 
 void Straudio::onError(std::string severity, std::string message) {
-	Loggy::info("ERROR[" + severity + "] " + message);
+	PLOG_ERROR << "Error[" << severity << "] " << message;
 }
 
-//void Straudio::onClientDescription(std::string description, std::string type) {
-//	pc->setRemoteDescription(rtc::Description(description, type));
-//	Loggy::info("remote desc set");
-//}
-
-//void Straudio::onClientCandidate(std::string candidate, std::string mid) {
-//	pc->addRemoteCandidate(rtc::Candidate(candidate, mid));
-//	Loggy::info("remote cand added");
-//}
-
-void Straudio::initStream() {
-	wsm->ss->createRoom();
-	
-//	rtc::Configuration config;
-//	config.iceServers.emplace_back("stun:stun4.l.google.com:19302");
-//	config.iceServers.emplace_back("stun:stun3.l.google.com:19302");
-//	config.iceServers.emplace_back("stun:stun2.l.google.com:19302");
-//	config.iceServers.emplace_back("stun:stun.l.google.com:19302");
-//
-//	ss->createRoom();
-//	
-//	pc = std::make_shared<rtc::PeerConnection>(config);
-//
-//	pc->onStateChange([&](rtc::PeerConnection::State state) {
-//		std::cout << "State: " << state << std::endl;
-//		if (state == rtc::PeerConnection::State::Connected) {
-//			
-//		}
-//	});
-//
-//	pc->onGatheringStateChange(
-//	    [](rtc::PeerConnection::GatheringState state) { std::cout << "Gathering State: " << state << std::endl; });
-//
-//	pc->onLocalDescription([&](const rtc::Description &description) {
-//		std::cout << std::string(description);
-//		ss->setDescription(description.typeString(), std::string(description));
-//	});
-//
-//	pc->onLocalCandidate([&](const rtc::Candidate &candidate) {
-//		ss->addCandidate("candidate", std::string(candidate), "data");
-//	});
-//
-//	pc->onDataChannel([](std::shared_ptr<rtc::DataChannel> dc) {
-//		std::cout << "DataChannel success dawg" << std::endl;
-//	});
-//	
-//	auto dc = pc->createDataChannel("test");
-//	
-//	dc->onOpen([dc]() {
-//		std::cout << "DataChannel from ";
-//		dc->send("Hello from ");
-//	});
-//
-//	dc->onClosed([]() { std::cout << "DataChannel from "; });
-//
-//	dc->onMessage([](const std::variant<rtc::binary, std::string> &message) {
-//		std::cout << "Message from ";
-//	});
-
+void Straudio::sendPcmData(float* data, size_t size) {
+	if (GetParam(kStream)->Bool()) wsm->sendPcmData(data, size);
 }
 
-void Straudio::onLoginSuccess() {
-	// Nothing to do here.
+void Straudio::onBufferReady(int sampleRate, int nChans, int batchSize, int bufferSize) {
+	if (room->state == "open" && *signalState == "open") {
+		PLOG_INFO << "Audio details changed. Updating server info...";
+		wsm->updateAudioSettings(sampleRate, nChans, batchSize);
+	} else {
+		PLOG_DEBUG << "Tried to send audio details while room || signal != open. Ignoring...";
+	}
 }
 
-void Straudio::OnUIOpen() {
-	uiOpen = true;
+void Straudio::OnParamChange(int paramIdx) {
+	switch(paramIdx) {
+		case kUploadBufferSize:
+			int bufferSize = PcmUploadBuffer::buffSizeForParamVal(GetParam(paramIdx)->Int());
+			if (uploadBuffer->bufferSize != bufferSize)
+				uploadBuffer->updateSettings(uploadBuffer->sampleRate, uploadBuffer->nChannels,
+											 uploadBuffer->batchSize, bufferSize, false);
+			break;
+	}
 }
 
-void Straudio::OnUIClose() {
-	
-	uiOpen = false;
-}
+void Straudio::OnUIOpen() {}
+void Straudio::OnUIClose() {}
 
 void Straudio::OnReset() {
-//	if (uiOpen) audioInfoPanel->updateAudioInfo(NOutChansConnected(), GetSampleRate(), GetBlockSize());
+	PLOG_INFO << "OnReset()";
+	uploadBuffer->updateSettings(GetSampleRate(), NOutChansConnected(),
+								 uploadBuffer->batchSize, uploadBuffer->bufferSize, true);
 }
 	
-
-void Straudio::OnRestoreState() {
-	
-}
-
-void Straudio::OnHostIdentified() {
-	
-}
-void Straudio::OnIdle() {
-	
-}
 void Straudio::OnActivate(bool active) {
+	PLOG_INFO << "OnActivate() -> active = " << active;
 	
+	if (active) {
+		uploadBuffer->updateSettings(GetSampleRate(), NOutChansConnected(),
+									 uploadBuffer->batchSize, uploadBuffer->bufferSize, true);
+	}
 }
 
 void Straudio::ProcessBlock(iplug::sample** inputs, iplug::sample** outputs, int nFrames) {
     const int nChans = NOutChansConnected();
 	
-//	if (GetParam(kMonitor)->Bool()) monitorControl->propagateAudio(inputs, outputs, nFrames, nChans);
-//	else monitorControl->propagateSilence(outputs, nFrames, nChans);
+	if (GetParam(kMonitor)->Bool()) AudioPropagator::propagateAudio(inputs, outputs, nFrames, nChans);
+	else AudioPropagator::propagateSilence(outputs, nFrames, nChans);
 	
-	//if (GetParam(kStream)->Bool()) streamControl->onDataAvailable(inputs, nFrames, nChans);
-	//else streamControl->flushIfNecessary();
-	
-}
-
-Straudio::~Straudio() {
-	
+	uploadBuffer->processBlock(inputs, nFrames, nChans);
 }

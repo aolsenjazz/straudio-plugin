@@ -1,7 +1,7 @@
 #include <iostream>
 #include <utility>
-#include "HttpClient.h"
-#include "Preferences.h"
+#include "http_client.h"
+#include "preferences.h"
 #include "logger.h"
 
 #include "rtc/rtc.hpp"

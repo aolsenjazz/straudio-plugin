@@ -43,38 +43,40 @@ public:
 class Room {
 public:
 	
+	std::string state;
 	std::string rId;
-	Host* host;
-	std::vector<Participant> participants;
+	
+	std::vector<std::shared_ptr<Participant>> participants;
+	std::shared_ptr<Host> host;
 	
 	Room(nlohmann::json j) {
-		try { host = new Host(j["host"]);}
-		catch (int e) { Loggy::info("Failed to parse room host"); }
+		try { host = std::make_shared<Host>(j["host"]); }
+		catch (int e) {  }
 		
 		rId = j["id"].get<std::string>();
-		
-		
+		state = j["state"].get<std::string>();
 	}
 	
-	void from_json(const nlohmann::json& j, Room& r) {
-//		rId = j["id"].get<std::string>();
-
-//		const nlohmann::json& pj = j.at("participants");
-//		r.participants.resize(pj.size());
-//		std::copy(pj.begin(), pj.end(), r.participants.begin());
+	Room(){}
+	
+	static std::shared_ptr<Room> CLOSED_PTR() {
+		std::shared_ptr<Room> r = std::make_shared<Room>();
+		r->state = "closed";
+		return r;
 	}
 	
 	std::string toString() {
 		std::ostringstream os;
 		os << "ROOM\n\tId: " << rId << std::endl;
 		
-		if (host) os << host->toString();
+		if (host != nullptr) os << host->toString();
 		else os << "Host: none\n";
 		
-		for(Participant p: participants) {
-			os << p.toString();
+		for(std::shared_ptr<Participant> p: participants) {
+			os << p->toString();
 		}
 		
 		return os.str();
 	}
+	
 };

@@ -1,99 +1,241 @@
-#pragma once
-
-#include "rtc/rtc.hpp"
+#include "shared_config.h"
+#include "build_config.h"
 #include "logger.h"
-#include "nlohmann/json.hpp"
+#include "rtc/rtc.hpp"
+#include "domain.h"
+#include "interval_executor.h"
+#include "timeout_executor.h"
 
-class SignalAService {
-	
+#include <chrono>
+
+class SignalService {
+
 private:
-//	std::shared_ptr<rtc::WebSocket> ws;
 	
-	void onOpen() {
-		Loggy::info("Socket open!!");
+	std::shared_ptr<rtc::WebSocket> _ws;
+	std::unique_ptr<IntervalExecutor> _reconnectExecutor;
+	
+	std::shared_ptr<Room> room;
+	std::shared_ptr<std::string> signalState;
+	
+	std::function<void(std::string, std::string)> _errorCb;
+	std::function<void()> _signalStateChangeCb;
+	std::function<void()> _roomStateChangeCb;
+	std::function<void(std::string, std::string, std::string)> _remoteDescriptionCb;
+	std::function<void(std::string, std::string, std::string)> _remoteCandidateCb;
+	std::function<void(std::string)> _closeRtcCb;
+	
+	bool keepAlive = true;
+	bool destructing = false;
+	
+	void _onOpen() {
+		PLOG_DEBUG << "websocket open";
+		
+		*signalState = "open";
+		_signalStateChangeCb();
 	}
 	
-	void onMessage(const std::variant<rtc::binary, std::string> &message) {
-//		if (auto* str_msg = std::get_if<std::string>(&message)) {
-//			auto j = nlohmann::json::parse(*str_msg);
-//
-//			auto method = j["method"].get<std::string>();
-//
-//			if (method == "createSuccess") {
-//				Loggy::info("Room created!");
-//			} else if (method == "clientDescription") {
-//				std::string description = j["description"].get<std::string>();
-//				std::string type = j["type"].get<std::string>();
-//
-//
-//				descriptionCb(description, type);
-//			} else if (method == "clientCandidate") {
-//				std::string candidate = j["candidate"].get<std::string>();
-//				std::string mid = j["mid"].get<std::string>();
-//
-//				candidateCb(candidate, mid);
-//			}
-//		} else {
-//			// error, handle appropriately
-//		}
+	void _onClose() {
+		PLOG_DEBUG << "websocket closed";
+		
+		if (destructing) return; // if object is destructing, don't reconnect WS
+		
+		room->state = "closed";
+		*signalState = "closed";
+		_signalStateChangeCb();
+		
+		_reconnectExecutor->start();
 	}
 	
-	void onClose() {
-		Loggy::info("Closed!");
+	void _onError(const std::string &error) {
+		_errorCb("warn", error);
 	}
 	
-	void onError(const std::string &error) {
-		Loggy::info("Error in signalling websocket");
+	void _onMessage(const std::variant<rtc::binary, std::string> &message) {
+		if (auto* str_msg = std::get_if<std::string>(&message)) {
+			PLOG_VERBOSE << *str_msg;
+			auto j = nlohmann::json::parse(*str_msg);
+			
+			auto method = j["method"].get<std::string>();
+
+			if (method == "audioDetailsResponse")     _onAudioDetailsResponse(j);
+			else if (method == "clientJoin")          _onClientJoin(j);
+			else if (method == "clientLeave")         _onClientLeave(j);
+			else if (method == "descriptionResponse") _onSendDescriptionResponse(j);
+			else if (method == "candidateResponse")   _onSendCandidateResponse(j);
+			else if (method == "description")         _onRemoteDescription(j);
+			else if (method == "candidate")           _onRemoteCandidate(j);
+			else if (method == "rejoinRoomResponse")  _onRejoinResponse(j);
+			else if (method == "createRoomResponse")  _onCreateRoomResponse(j);
+			else PLOG_INFO << "Unknown method: " << method;
+			
+		} else {
+			PLOG_ERROR << "Recevied message is not a string. This shouldn't happen.";
+		}
 	}
 	
-	std::function<void(std::string, std::string)> descriptionCb;
-	std::function<void(std::string, std::string)> candidateCb;
+	// For now, these are noop
+	void _onClientJoin(nlohmann::json j) {
+		std::string clientId = j["client"]["id"].get<std::string>();
+		PLOG_INFO << "Client[" << clientId << "] joined room";
+	}
+	void _onClientLeave(nlohmann::json j) {
+		std::string clientId = j["client"]["id"].get<std::string>();
+		
+		PLOG_INFO << "Client[" << clientId << "] left room";
+		
+		_closeRtcCb(clientId);
+	}
 	
+	
+	void _onCreateRoomResponse(nlohmann::json j) {
+		bool success = j["success"].get<bool>();
+
+		if (!success) {
+			std::string errorString = j["error"].get<std::string>();
+			
+			PLOG_ERROR << "Error creating room: " << errorString;
+		} else {
+			*room = Room(j["room"]);
+			_roomStateChangeCb();
+		}
+	}
+	
+	void _onAudioDetailsResponse(nlohmann::json j) {/** This SHOULDN'T fail, but handle just in case */}
+	void _onSendDescriptionResponse(nlohmann::json j) {/** This SHOULDN'T fail, but handle just in case */}
+	void _onSendCandidateResponse(nlohmann::json j) {/** This SHOULDN'T fail, but handle just in case */}
+	void _onRemoteDescription(nlohmann::json j) {
+		std::string sourceId = j["sourceId"].get<std::string>();
+		std::string description = j["description"]["description"].get<std::string>();
+		std::string type = j["description"]["type"].get<std::string>();
+		
+		_remoteDescriptionCb(sourceId, type, description);
+	}
+	void _onRemoteCandidate(nlohmann::json j) {
+		std::string sourceId = j["sourceId"].get<std::string>();
+		std::string candidate = j["candidate"]["candidate"].get<std::string>();
+		std::string mid = j["candidate"]["mid"].get<std::string>();
+		
+		_remoteCandidateCb(sourceId, mid, candidate);
+	}
+	
+	void _onRejoinResponse(nlohmann::json j) {
+		
+	}
+
 public:
-	SignalAService(std::string url, std::function<void(std::string, std::string)> descCb, std::function<void(std::string, std::string)> candCb) {
-//		descriptionCb = descCb;
-//		candidateCb = candCb;
-//
-//		ws = std::make_shared<rtc::WebSocket>();
-//
-//		ws->onOpen(std::bind(&SignalAService::onOpen, this));
-//		ws->onMessage(std::bind(&SignalAService::onMessage, this, std::placeholders::_1));
-//		ws->onClosed(std::bind(&SignalAService::onClose, this));
-//		ws->onError(std::bind(&SignalAService::onError, this, std::placeholders::_1));
-//
-//		ws->open(url);
+	
+	std::string url;
+	
+	SignalService(std::shared_ptr<Room> r,
+				  std::shared_ptr<std::string> sigState,
+				  std::function<void()> signalStateCb,
+				  std::function<void()> roomStateCb,
+				  std::function<void(std::string, std::string)> errorCb,
+				  std::function<void(std::string, std::string, std::string)> descriptionCb,
+				  std::function<void(std::string, std::string, std::string)> candidateCb,
+				  std::function<void(std::string)> closeRtcCb) {
+		room = r;
+		signalState = sigState;
+		
+		_remoteCandidateCb = candidateCb;
+		_roomStateChangeCb = roomStateCb;
+		_signalStateChangeCb = signalStateCb;
+		_errorCb = errorCb;
+		_remoteDescriptionCb = descriptionCb;
+		_closeRtcCb = closeRtcCb;
+		
+		std::ostringstream os;
+		os << (USE_TLS ? "wss://" : "ws://") << SIGNAL_HOST << ":" << SIGNAL_PORT << "/";
+		url = os.str();
+		
+		rtc::WebSocket::Configuration config;
+		config.disableTlsVerification = true;
+		_ws = std::make_shared<rtc::WebSocket>(config);
+		
+		auto workFunc = std::bind(&SignalService::connect, this);
+		auto runWhile = std::bind(&rtc::WebSocket::isClosed, _ws);
+		_reconnectExecutor = std::make_unique<IntervalExecutor>(1000 , workFunc, runWhile);
 	}
 	
-	void createRoom() {
-//		nlohmann::json j;
-//
-//		j["method"] = "createRoom";
-//		j["displayName"] = "hostboiiii";
-//
-//		ws->send(j.dump());
+	~SignalService() {
+		destructing = true;
+		
+		if (_reconnectExecutor != nullptr) _reconnectExecutor->stop();
+		
+		_ws->close();
 	}
 	
-	void setDescription(std::string type, std::string description) {
-//		nlohmann::json j = {
-//			{"type", type},
-//			{"description", description},
-//			{"method", "setDescription"}
-//		};
-//
-//		Loggy::info("Setting local description: " + j.dump());
-//		ws->send(j.dump());
+	void tryToConnect() {
+		_reconnectExecutor->start();
 	}
 	
-	void addCandidate(std::string type, std::string candidate, std::string mid) {
-//		nlohmann::json j = {
-//			{"type", type},
-//			{"candidate", candidate},
-//			{"mid", mid},
-//			{"method", "addCandidate"}
-//		};
-//
-//		Loggy::info("Sending local candidate: " + j.dump());
-//		ws->send(j.dump());
+	void connect() {
+		try {
+			_ws->open(url);
+			_ws->onOpen(std::bind(&SignalService::_onOpen, this));
+			_ws->onMessage(std::bind(&SignalService::_onMessage, this, std::placeholders::_1));
+			_ws->onClosed(std::bind(&SignalService::_onClose, this));
+			_ws->onError(std::bind(&SignalService::_onError, this, std::placeholders::_1));
+		} catch (const std::exception& e) {
+			PLOG_ERROR << "Failed to open websocket: " << e.what();
+		}
 	}
 	
+	void createRoom(int sampleRate, int nChannels, int batchSize) {
+		nlohmann::json j = {
+			{"displayName", "Host"},
+			{"method", "createRoom"},
+			{"sampleRate", sampleRate},
+			{"nChannels", nChannels},
+			{"batchSize", batchSize}
+		};
+		
+		safeSend(j.dump());
+	}
+	
+	void sendCandidate(std::string targetId, std::string mid, std::string candidate) {
+		nlohmann::json j = {
+			{"targetId", targetId},
+			{"candidate", {
+				{"mid", mid},
+				{"candidate", candidate},
+			}},
+			{"method", "candidate"}
+		};
+		
+		safeSend(j.dump());
+	}
+	
+	void sendDescription(std::string targetId, std::string type, std::string description) {
+		nlohmann::json j = {
+			{"targetId", targetId},
+			{"description", {
+				{"type", type},
+				{"description", description},
+			}},
+			{"method", "description"}
+		};
+		
+		safeSend(j.dump());
+	}
+	
+	void updateAudioSettings(int sampleRate, int nChannels, int batchSize) {
+		nlohmann::json j = {
+			{"sampleRate", sampleRate},
+			{"nChannels", nChannels},
+			{"batchSize", batchSize},
+			{"method", "audioDetails"}
+		};
+		
+		safeSend(j.dump());
+	}
+	
+	void safeSend(std::string data) {
+		if (_ws->readyState() == rtc::WebSocket::State::Open) {
+			_ws->send(data);
+		} else {
+			PLOG_WARNING << "Tried to call ws->send() in incorrect State";
+		}
+	}
 };

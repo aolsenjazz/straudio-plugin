@@ -49,6 +49,7 @@ public:
 	bool ended() const;
 
 	void hintType(Type type);
+	void setDataMid(string mid);
 	void setFingerprint(string fingerprint);
 	void setSctpPort(uint16_t port);
 	void setMaxMessageSize(size_t size);
@@ -86,7 +87,7 @@ private:
 		string mid;
 		std::vector<string> attributes;
 	};
-	std::map<string, Media> mMedia; // by mid
+	std::map<int, Media> mMedia; // by m-line index
 
 	// Candidates
 	std::vector<Candidate> mCandidates;

@@ -48,7 +48,7 @@
 #elif defined(__APPLE__)
 #include <CoreServices/CoreServices.h>
 #include <sys/stat.h>
-#define MAX_PATH PATH_MAX
+//#define MAX_PATH PATH_MAX <- this gives a compiler warning, removing should be harmless
 #define PATH_SEPARATOR_CHAR '/'
 #define PATH_SEPARATOR_STRING "/"
 #else
@@ -103,6 +103,8 @@ static inline void get_user_config_file(char *out, unsigned int maxlen, const ch
 	}
 	strcat(out, "\\");
 	strcat(out, appname);
+	strcat(out, PATH_SEPARATOR_STRING);
+	strcat(out, appname);
 	strcat(out, ".ini");
 #elif defined(__APPLE__)
 	FSRef ref;
@@ -117,6 +119,8 @@ static inline void get_user_config_file(char *out, unsigned int maxlen, const ch
 	}
 
 	strcpy(out, home);
+	strcat(out, PATH_SEPARATOR_STRING);
+	strcat(out, appname);
 	strcat(out, PATH_SEPARATOR_STRING);
 	strcat(out, appname);
 	strcat(out, ext);
