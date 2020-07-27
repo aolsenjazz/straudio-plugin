@@ -171,13 +171,13 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_WIN32_WINNT=0x0601;$(VST3_DEFS);$(DEBUG_DEFS);$(EXTRA_DEBUG_DEFS);%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
-      <AdditionalIncludeDirectories>$(VST3_INC_PATHS);$(SolutionDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(VST3_INC_PATHS);$(SolutionDir)config\debug;$(SolutionDir)config;$(SolutionDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
-      <AdditionalDependencies>juice_static.lib;sioclient_d.lib;libcrypto_static.lib;libssl_static.lib;usrsctp.lib;datachannel_static_d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>juice_static_d.lib;libcrypto_static.lib;platform_folders_d.lib;libssl_static.lib;usrsctp_d.lib;datachannel_static_d.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>$(VST3_SDK)\public.sdk\source\main\winexport.def</ModuleDefinitionFile>
       <AdditionalLibraryDirectories>$(SolutionDir)lib\debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
@@ -213,7 +213,7 @@
       <PreprocessorDefinitions>_WIN32_WINNT=0x0601;$(VST3_DEFS);$(RELEASE_DEFS);$(EXTRA_RELEASE_DEFS);%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
-      <AdditionalIncludeDirectories>$(VST3_INC_PATHS);$(SolutionDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)config\release;$(SolutionDir)config;$(VST3_INC_PATHS);$(SolutionDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
     </ClCompile>
@@ -221,7 +221,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <SubSystem>Windows</SubSystem>
-      <AdditionalDependencies>datachannel_static.lib;juice_static.lib;libboost_random-vc142-mt-x64-1_73.lib;libcrypto_static.lib;libssl_static.lib;sioclient.lib;usrsctp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>datachannel_static.lib;platform_folders.lib;juice_static.lib;libcrypto_static.lib;libssl_static.lib;usrsctp.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>$(VST3_SDK)\public.sdk\source\main\winexport.def</ModuleDefinitionFile>
       <AdditionalLibraryDirectories>$(SolutionDir)lib\release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
@@ -350,7 +350,7 @@
     <ClInclude Include="..\lib\cfgpath.h" />
     <ClInclude Include="..\lib\httplib.h" />
     <ClInclude Include="..\lib\json.hpp" />
-    <ClInclude Include="..\Preferences.h" />
+    <ClInclude Include="..\preferences.h" />
     <ClInclude Include="..\Straudio.h" />
     <ClInclude Include="..\resources\resource.h" />
     <ClInclude Include="..\ui\AudioInfoPanel.h" />

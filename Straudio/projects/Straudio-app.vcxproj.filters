@@ -292,16 +292,9 @@
       <Filter>IGraphics</Filter>
     </ClInclude>
     <ClInclude Include="..\HttpClient.h" />
-    <ClInclude Include="..\Preferences.h" />
-    <ClInclude Include="..\ui\AudioInfoPanel.h" />
-    <ClInclude Include="..\ui\LoginPanel.h" />
-    <ClInclude Include="..\ui\MonitorControl.h" />
-    <ClInclude Include="..\ui\StreamControl.h" />
     <ClInclude Include="..\lib\cfgpath.h" />
     <ClInclude Include="..\lib\httplib.h" />
     <ClInclude Include="..\lib\json.hpp" />
-    <ClInclude Include="..\logger.h" />
-    <ClInclude Include="..\new_signal_service.h" />
     <ClInclude Include="..\config\shared_config.h">
       <Filter>config</Filter>
     </ClInclude>
@@ -310,6 +303,19 @@
     </ClInclude>
     <ClInclude Include="..\config\release\build_config.h">
       <Filter>config\release</Filter>
+    </ClInclude>
+    <ClInclude Include="..\preferences.h" />
+    <ClInclude Include="..\ui\AudioInfoPanel.h">
+      <Filter>ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ui\StreamControl.h">
+      <Filter>ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ui\MonitorControl.h">
+      <Filter>ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ui\LoginPanel.h">
+      <Filter>ui</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -348,6 +354,9 @@
     </Filter>
     <Filter Include="config\release">
       <UniqueIdentifier>{595cfaf8-6fe4-4ccd-8467-f29811974d77}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ui">
+      <UniqueIdentifier>{ba5b84d2-2765-49e5-b219-c91bd71ef4d5}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

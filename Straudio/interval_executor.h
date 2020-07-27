@@ -2,7 +2,6 @@
 #include <chrono>
 #include <thread>
 #include <functional>
-#include "logger.h"
 
 class IntervalExecutor {
 	

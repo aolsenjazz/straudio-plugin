@@ -2,7 +2,6 @@
 #include <utility>
 #include "http_client.h"
 #include "preferences.h"
-#include "logger.h"
 
 #include "rtc/rtc.hpp"
 

@@ -385,13 +385,19 @@
       <Filter>IGraphics</Filter>
     </ClInclude>
     <ClInclude Include="..\HttpClient.h" />
-    <ClInclude Include="..\Preferences.h" />
     <ClInclude Include="..\lib\cfgpath.h" />
     <ClInclude Include="..\lib\httplib.h" />
     <ClInclude Include="..\lib\json.hpp" />
-    <ClInclude Include="..\ui\AudioInfoPanel.h" />
-    <ClInclude Include="..\ui\LoginPanel.h" />
-    <ClInclude Include="..\ui\MonitorControl.h" />
+    <ClInclude Include="..\preferences.h" />
+    <ClInclude Include="..\ui\AudioInfoPanel.h">
+      <Filter>ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ui\LoginPanel.h">
+      <Filter>ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ui\MonitorControl.h">
+      <Filter>ui</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="resources">
@@ -450,6 +456,9 @@
     </Filter>
     <Filter Include="IPlug\VST3\VST3_SDK\plugininterfaces\base">
       <UniqueIdentifier>{5f06b03e-5093-46c0-9513-efb4e494c857}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ui">
+      <UniqueIdentifier>{7c214ac5-3059-4fa3-9cfb-1041c6a5dc02}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

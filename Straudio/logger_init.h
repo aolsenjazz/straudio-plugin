@@ -1,3 +1,9 @@
+#if defined(_WIN32)
+#include <direct.h>
+#include <stdlib.h>
+#include <stdio.h>
+#endif
+
 #include "build_config.h"
 #include "shared_config.h"
 #include "sago/platform_folders.h"
@@ -35,11 +41,11 @@ public:
 			return; // folder already exists
 		}
 		
-		mode_t nMode = 0766;
 		int nError = 0;
 		#if defined(_WIN32)
 			nError = _mkdir(dataLocation.c_str());
 		#else
+			mode_t nMode = 0766;
 			nError = mkdir(dataLocation.c_str(), nMode);
 		#endif
 		

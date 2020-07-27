@@ -261,7 +261,7 @@
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(SolutionDir)include;$(AAX_INC_PATHS);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)config\debug;$(SolutionDir)config;$(SolutionDir)include;$(AAX_INC_PATHS);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>$(AAX_DEFS);$(DEBUG_DEFS);$(EXTRA_DEBUG_DEFS);%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <ExceptionHandling>Async</ExceptionHandling>
@@ -276,7 +276,7 @@
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>juice_static.lib;sioclient_d.lib;libcrypto_static.lib;libssl_static.lib;usrsctp.lib;datachannel_static_d.lib;$(AAX_LIBS);%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>juice_static_d.lib;libcrypto_static.lib;platform_folders_d.lib;libssl_static.lib;usrsctp_d.lib;datachannel_static_d.lib;$(AAX_LIBS);%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(BINARY_NAME).aaxplugin</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AssemblyDebug>
@@ -303,7 +303,7 @@
     </Midl>
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
-      <AdditionalIncludeDirectories>$(SolutionDir)include;$(AAX_INC_PATHS);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)config\release;$(SolutionDir)config;$(SolutionDir)include;$(AAX_INC_PATHS);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>$(AAX_DEFS);$(RELEASE_DEFS);$(EXTRA_RELEASE_DEFS);%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <ExceptionHandling>Async</ExceptionHandling>
@@ -325,7 +325,7 @@
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>datachannel_static.lib;juice_static.lib;libboost_random-vc142-mt-x64-1_73.lib;libcrypto_static.lib;libssl_static.lib;sioclient.lib;usrsctp.lib;$(AAX_LIBS);%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>datachannel_static.lib;platform_folders.lib;juice_static.lib;libcrypto_static.lib;libssl_static.lib;usrsctp.lib;$(AAX_LIBS);%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(BINARY_NAME).aaxplugin</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <SubSystem>Windows</SubSystem>
@@ -456,7 +456,6 @@
     <ClCompile Include="..\..\..\iPlug2\IPlug\IPlugProcessor.cpp" />
     <ClCompile Include="..\..\..\iPlug2\IPlug\IPlugTimer.cpp" />
     <ClCompile Include="..\Straudio.cpp" />
-    <ClCompile Include="..\stream\TcpStreamClient.cpp" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuildStep Include="..\..\AAX_SDK\Libs\Release\AAXLibrary.lib">
@@ -547,10 +546,9 @@
     <ClInclude Include="..\lib\cfgpath.h" />
     <ClInclude Include="..\lib\httplib.h" />
     <ClInclude Include="..\lib\json.hpp" />
-    <ClInclude Include="..\Preferences.h" />
+    <ClInclude Include="..\preferences.h" />
     <ClInclude Include="..\Straudio.h" />
     <ClInclude Include="..\resources\resource.h" />
-    <ClInclude Include="..\stream\TcpStreamClient.h" />
     <ClInclude Include="..\ui\AudioInfoPanel.h" />
     <ClInclude Include="..\ui\LoginPanel.h" />
     <ClInclude Include="..\ui\MonitorControl.h" />

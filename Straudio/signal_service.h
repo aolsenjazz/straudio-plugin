@@ -1,6 +1,5 @@
 #include "shared_config.h"
 #include "build_config.h"
-#include "logger.h"
 #include "rtc/rtc.hpp"
 #include "domain.h"
 #include "interval_executor.h"

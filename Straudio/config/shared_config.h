@@ -7,7 +7,8 @@
 #define MAX_LOGS 1
 
 #ifdef _WIN32
-#define LOG_LOCATION "" // TODO
+#define DATA_LOCATION (sago::getDataHome() + "\\Straudio")
+#define LOG_LOCATION (DATA_LOCATION + "\\straudio.log")
 #elif __APPLE__
 #define DATA_LOCATION (sago::getDataHome() + "/Straudio")
 #define LOG_LOCATION (DATA_LOCATION + "/straudio.log")
