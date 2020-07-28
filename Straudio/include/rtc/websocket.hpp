@@ -67,6 +67,9 @@ public:
 	// Extended API
 	std::optional<std::variant<binary, string>> receive() override;
 	size_t availableAmount() const override; // total size available to receive
+	
+	void setPingCallbacks(std::function<void()> onPingSend,
+						  std::function<void()> onPingReceive);
 
 private:
 	bool changeState(State state);

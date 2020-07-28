@@ -34,6 +34,8 @@ private:
 	void sendPcmData(float* data, size_t size);
 	void onBufferReady(int sampleRate, int nChans, int batchSize, int bufferSize);
 	
+	void setRoomStatusMessage(std::string);
+	
 	std::unique_ptr<WebServicesManager> wsm;
 	std::unique_ptr<PcmUploadBuffer> uploadBuffer;
 	
@@ -41,5 +43,5 @@ private:
 	std::shared_ptr<std::string> signalState = std::make_shared<std::string>("closed");
 	
 	std::unique_ptr<std::string> roomMsg = std::make_unique<std::string>("Creating room...");
-	bool uiOpen;
+	
 };

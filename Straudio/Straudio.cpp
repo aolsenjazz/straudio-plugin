@@ -69,6 +69,10 @@ void Straudio::roomStateChange() {
 		msg = os.str();
 	}
 	
+	setRoomStatusMessage(msg);
+}
+
+void Straudio::setRoomStatusMessage(std::string msg) {
 	roomMsg.reset(new std::string(msg));
 	
 	if (GetUI()) {
@@ -85,6 +89,7 @@ void Straudio::signalStateChange() {
 		wsm->ss->createRoom(uploadBuffer->sampleRate, uploadBuffer->nChannels, uploadBuffer->batchSize);
 	} else {
 		wsm->closePeerConnections(); // something happened with the connection. close peer connections
+		setRoomStatusMessage("Disconnected...");
 	}
 }
 

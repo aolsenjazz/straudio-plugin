@@ -17,7 +17,7 @@ private:
 	void _onPCGatheringStateChange(rtc::PeerConnection::GatheringState state) { /** noop */ }
 	
 	void _initDataChannel(std::shared_ptr<rtc::DataChannel> dc, std::string sourceId) {
-		PLOG_VERBOSE << "DataChannel with Client[" << sourceId << "] open";
+		PLOG_INFO << "DataChannel with Client[" << sourceId << "] open";
 		
 		dc->onClosed([sourceId]() { std::cout << "DataChannel from " << sourceId << " closed" << std::endl; });
 

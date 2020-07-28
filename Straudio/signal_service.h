@@ -13,6 +13,7 @@ private:
 	
 	std::shared_ptr<rtc::WebSocket> _ws;
 	std::unique_ptr<IntervalExecutor> _reconnectExecutor;
+	std::unique_ptr<TimeoutExecutor> _heartbeatExecutor = nullptr;
 	
 	std::shared_ptr<Room> room;
 	std::shared_ptr<std::string> signalState;
@@ -29,9 +30,27 @@ private:
 	
 	void _onOpen() {
 		PLOG_DEBUG << "websocket open";
+		_ws->setPingCallbacks(std::bind(&SignalService::onSendPing, this),
+							  std::bind(&SignalService::onReceivePing, this));
+		
 		
 		*signalState = "open";
 		_signalStateChangeCb();
+	}
+	
+	void onSendPing() {
+		// this is useless rn
+	}
+	
+	void onReceivePing() {
+		PLOG_DEBUG << "pong received";
+		
+		if (_heartbeatExecutor != nullptr) {
+			_heartbeatExecutor->interrupt();
+		}
+		
+		_heartbeatExecutor.reset(new TimeoutExecutor(7000, std::bind(&rtc::WebSocket::close, _ws)));
+		_heartbeatExecutor->start();
 	}
 	
 	void _onClose() {

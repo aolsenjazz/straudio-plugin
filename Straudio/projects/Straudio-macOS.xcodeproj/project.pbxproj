@@ -613,11 +613,8 @@
 		AFAFB69024BA2CEA00CEE29E /* web_services_manager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = web_services_manager.h; path = ../web_services_manager.h; sourceTree = "<group>"; };
 		AFAFB69224BA2CEA00CEE29E /* config.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = config.h; path = ../config.h; sourceTree = "<group>"; };
 		AFAFB69324BA2CEA00CEE29E /* domain.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = domain.h; path = ../domain.h; sourceTree = "<group>"; };
-		AFAFB69524BA2D2100CEE29E /* MonitorControl.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = MonitorControl.cpp; sourceTree = "<group>"; };
-		AFAFB69624BA2D2100CEE29E /* StreamControl.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = StreamControl.h; sourceTree = "<group>"; };
 		AFAFB69724BA2D2100CEE29E /* LoginPanel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LoginPanel.h; sourceTree = "<group>"; };
 		AFAFB69824BA2D2100CEE29E /* AudioInfoPanel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AudioInfoPanel.h; sourceTree = "<group>"; };
-		AFAFB69924BA2D2100CEE29E /* MonitorControl.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MonitorControl.h; sourceTree = "<group>"; };
 		AFAFB69E24BA2D2100CEE29E /* libcrypto.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libcrypto.a; sourceTree = "<group>"; };
 		AFAFB69F24BA2D2100CEE29E /* libdatachannel-static.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = "libdatachannel-static.a"; sourceTree = "<group>"; };
 		AFAFB6A024BA2D2100CEE29E /* libnettle.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libnettle.a; sourceTree = "<group>"; };
@@ -15755,11 +15752,8 @@
 		AFAFB69424BA2D2100CEE29E /* ui */ = {
 			isa = PBXGroup;
 			children = (
-				AFAFB69524BA2D2100CEE29E /* MonitorControl.cpp */,
-				AFAFB69624BA2D2100CEE29E /* StreamControl.h */,
 				AFAFB69724BA2D2100CEE29E /* LoginPanel.h */,
 				AFAFB69824BA2D2100CEE29E /* AudioInfoPanel.h */,
-				AFAFB69924BA2D2100CEE29E /* MonitorControl.h */,
 			);
 			name = ui;
 			path = ../ui;
