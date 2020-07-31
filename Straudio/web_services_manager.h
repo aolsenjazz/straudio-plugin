@@ -58,12 +58,13 @@ public:
 		pcm = std::make_unique<PeerConnectionManager>(boundLocalDesc, boundLocalCand);
 	}
 	
-	void sendPcmData(float* data, size_t size) {
+	template <typename T>
+	void sendPcmData(T data, size_t size) {
 		pcm->sendAudio(data, size);
 	}
 	
-	void updateAudioSettings(int sampleRate, int nChannels, int bufferSize) {
-		ss->updateAudioSettings(sampleRate, nChannels, bufferSize);
+	void updateAudioSettings(int sampleRate, int nChannels, int bufferSize, int bitDepth) {
+		ss->updateAudioSettings(sampleRate, nChannels, bufferSize, bitDepth);
 	}
 	
 	void closeRtcConnection(std::string clientId) {

@@ -49,7 +49,7 @@ private:
 			_heartbeatExecutor->interrupt();
 		}
 		
-		_heartbeatExecutor.reset(new TimeoutExecutor(7000, std::bind(&rtc::WebSocket::close, _ws)));
+		_heartbeatExecutor.reset(new TimeoutExecutor(12000, std::bind(&SignalService::close, this)));
 		_heartbeatExecutor->start();
 	}
 	
@@ -70,6 +70,10 @@ private:
 	}
 	
 	void _onMessage(const std::variant<rtc::binary, std::string> &message) {
+		if (_heartbeatExecutor != nullptr) {
+			_heartbeatExecutor->interrupt();
+		}
+		
 		if (auto* str_msg = std::get_if<std::string>(&message)) {
 			PLOG_VERBOSE << *str_msg;
 			auto j = nlohmann::json::parse(*str_msg);
@@ -179,6 +183,7 @@ public:
 	~SignalService() {
 		destructing = true;
 		
+		if (_heartbeatExecutor != nullptr) _heartbeatExecutor->interrupt();
 		if (_reconnectExecutor != nullptr) _reconnectExecutor->stop();
 		
 		_ws->close();
@@ -200,13 +205,18 @@ public:
 		}
 	}
 	
-	void createRoom(int sampleRate, int nChannels, int batchSize) {
+	void close() {
+		_ws->close();
+	}
+	
+	void createRoom(int sampleRate, int nChannels, int batchSize, int bitDepth) {
 		nlohmann::json j = {
 			{"displayName", "Host"},
 			{"method", "createRoom"},
 			{"sampleRate", sampleRate},
 			{"nChannels", nChannels},
-			{"batchSize", batchSize}
+			{"batchSize", batchSize},
+			{"bitDepth", bitDepth}
 		};
 		
 		safeSend(j.dump());
@@ -238,11 +248,12 @@ public:
 		safeSend(j.dump());
 	}
 	
-	void updateAudioSettings(int sampleRate, int nChannels, int batchSize) {
+	void updateAudioSettings(int sampleRate, int nChannels, int batchSize, int bitDepth) {
 		nlohmann::json j = {
 			{"sampleRate", sampleRate},
 			{"nChannels", nChannels},
 			{"batchSize", batchSize},
+			{"bitDepth", bitDepth},
 			{"method", "audioDetails"}
 		};
 		

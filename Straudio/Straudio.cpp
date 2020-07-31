@@ -19,6 +19,7 @@ Straudio::Straudio(const iplug::InstanceInfo& info)
 	GetParam(kStream)->InitBool("Stream", true);
 	GetParam(kUploadBufferSize)->InitEnum("UploadBufferSize", 2, 6, "", iplug::IParam::kFlagsNone,
 										  "", "256", "512", "1024", "2048", "4096", "8192");
+	GetParam(kBitDepth)->InitEnum("Bit Depth", 0, 2, "", iplug::IParam::kFlagsNone, "", "16 bit", "32 bit");
 
 	auto boundSigStateChange = std::bind(&Straudio::signalStateChange, this);
 	auto boundRoomStateChange = std::bind(&Straudio::roomStateChange, this);
@@ -26,9 +27,10 @@ Straudio::Straudio(const iplug::InstanceInfo& info)
 	wsm = std::make_unique<WebServicesManager>(room, signalState, boundSigStateChange,
 											   boundRoomStateChange, boundOnError);
 	
-	auto boundSendPcm = std::bind(&Straudio::sendPcmData, this, _1, _2);
-	auto boundUpdateAudio = std::bind(&Straudio::onBufferReady, this, _1, _2, _3, _4);
-	uploadBuffer = std::make_unique<PcmUploadBuffer>(boundSendPcm, boundUpdateAudio, GetSampleRate(),
+	auto boundSendFloat = std::bind(&Straudio::sendFloatData, this, _1, _2);
+	auto boundSendShort = std::bind(&Straudio::sendShortData, this, _1, _2);
+	auto boundUpdateAudio = std::bind(&Straudio::onBufferReady, this, _1, _2, _3, _4, _5);
+	uploadBuffer = std::make_unique<PcmUploadBuffer>(boundSendFloat, boundSendShort, boundUpdateAudio, GetSampleRate(),
 													 GetParam(kUploadBufferSize)->Int());
 	
 	Preferences::setAuth("bar");
@@ -46,14 +48,16 @@ Straudio::Straudio(const iplug::InstanceInfo& info)
 		const iplug::igraphics::IRECT root = pGraphics->GetBounds();
 		const iplug::igraphics::IRECT streamCtrlRect = root.GetFromBLHC(250, 100);
 		const iplug::igraphics::IRECT monitorCtrlRect = root.GetFromBRHC(250, 100);
+		const iplug::igraphics::IRECT bitDepthRect = root.GetFromTRHC(250, 100);
 
 		// Interface elements
 //		LoginPanel loginPanel(pGraphics, std::bind(&Straudio::onLoginSuccess, this));
 		
 		pGraphics->AttachControl(new iplug::igraphics::ITextControl(root.GetMidVPadded(50), roomMsg->c_str(), iplug::igraphics::IText(50)), 69);
-//		pGraphics->AttachControl(new iplug::igraphics::IVToggleControl(streamCtrlRect, std::bind(&Straudio::initStream, this), "Stream", iplug::igraphics::DEFAULT_STYLE, "Off", "On", false));
-		
+
 		pGraphics->AttachControl(new iplug::igraphics::ICaptionControl(streamCtrlRect, kUploadBufferSize, iplug::igraphics::IText(24.f), iplug::igraphics::DEFAULT_FGCOLOR, false), 80085, "misccontrols");
+		
+		pGraphics->AttachControl(new iplug::igraphics::ICaptionControl(bitDepthRect, kBitDepth, iplug::igraphics::IText(24.f), iplug::igraphics::DEFAULT_FGCOLOR, false), 80085, "misccontrols");
 		
 		pGraphics->AttachControl(new iplug::igraphics::IVToggleControl(monitorCtrlRect, kMonitor, "Monitor", iplug::igraphics::DEFAULT_STYLE, "Off", "On"));
 	  };
@@ -86,7 +90,8 @@ void Straudio::signalStateChange() {
 	PLOG_INFO << "Connection state change. State: " << *signalState;
 	
 	if (*signalState == "open") {
-		wsm->ss->createRoom(uploadBuffer->sampleRate, uploadBuffer->nChannels, uploadBuffer->batchSize);
+		wsm->ss->createRoom(uploadBuffer->sampleRate, uploadBuffer->nChannels,
+							uploadBuffer->batchSize, uploadBuffer->bitDepth);
 	} else {
 		wsm->closePeerConnections(); // something happened with the connection. close peer connections
 		setRoomStatusMessage("Disconnected...");
@@ -97,14 +102,18 @@ void Straudio::onError(std::string severity, std::string message) {
 	PLOG_ERROR << "Error[" << severity << "] " << message;
 }
 
-void Straudio::sendPcmData(float* data, size_t size) {
+void Straudio::sendFloatData(float* data, size_t size) {
 	if (GetParam(kStream)->Bool()) wsm->sendPcmData(data, size);
 }
 
-void Straudio::onBufferReady(int sampleRate, int nChans, int batchSize, int bufferSize) {
+void Straudio::sendShortData(short* data, size_t size) {
+	if (GetParam(kStream)->Bool()) wsm->sendPcmData(data, size);
+}
+
+void Straudio::onBufferReady(int sampleRate, int nChans, int batchSize, int bufferSize, int bitDepth) {
 	if (room->state == "open" && *signalState == "open") {
 		PLOG_INFO << "Audio details changed. Updating server info...";
-		wsm->updateAudioSettings(sampleRate, nChans, batchSize);
+		wsm->updateAudioSettings(sampleRate, nChans, batchSize, bitDepth);
 	} else {
 		PLOG_DEBUG << "Tried to send audio details while room || signal != open. Ignoring...";
 	}
@@ -112,12 +121,19 @@ void Straudio::onBufferReady(int sampleRate, int nChans, int batchSize, int buff
 
 void Straudio::OnParamChange(int paramIdx) {
 	switch(paramIdx) {
-		case kUploadBufferSize:
+		case kUploadBufferSize: {
 			int bufferSize = PcmUploadBuffer::buffSizeForParamVal(GetParam(paramIdx)->Int());
 			if (uploadBuffer->bufferSize != bufferSize)
 				uploadBuffer->updateSettings(uploadBuffer->sampleRate, uploadBuffer->nChannels,
-											 uploadBuffer->batchSize, bufferSize, false);
+											 uploadBuffer->batchSize, bufferSize, uploadBuffer->bitDepth, false);
 			break;
+		}
+		case kBitDepth: {
+			int bitDepth = (GetParam(kBitDepth)->Int() + 1) * 16;
+			uploadBuffer->updateSettings(uploadBuffer->sampleRate, uploadBuffer->nChannels,
+										 uploadBuffer->batchSize, uploadBuffer->bufferSize, bitDepth, true);
+			break;
+		}
 	}
 }
 
@@ -126,16 +142,16 @@ void Straudio::OnUIClose() {}
 
 void Straudio::OnReset() {
 	PLOG_INFO << "OnReset()";
-	uploadBuffer->updateSettings(GetSampleRate(), NOutChansConnected(),
-								 uploadBuffer->batchSize, uploadBuffer->bufferSize, true);
+	uploadBuffer->updateSettings(GetSampleRate(), NOutChansConnected(), uploadBuffer->batchSize,
+								 uploadBuffer->bufferSize, uploadBuffer->bitDepth, true);
 }
 	
 void Straudio::OnActivate(bool active) {
 	PLOG_INFO << "OnActivate() -> active = " << active;
 	
 	if (active) {
-		uploadBuffer->updateSettings(GetSampleRate(), NOutChansConnected(),
-									 uploadBuffer->batchSize, uploadBuffer->bufferSize, true);
+		uploadBuffer->updateSettings(GetSampleRate(), NOutChansConnected(), uploadBuffer->batchSize,
+									 uploadBuffer->bufferSize, uploadBuffer->bitDepth, true);
 	}
 }
 

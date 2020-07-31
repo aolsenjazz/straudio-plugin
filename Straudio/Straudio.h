@@ -12,6 +12,7 @@ enum EParams {
     kMonitor = 0,
 	kStream = 1,
 	kUploadBufferSize = 2,
+	kBitDepth = 3,
     kNumParams
 };
 
@@ -31,8 +32,9 @@ private:
 	void roomStateChange();
 	void onError(std::string severity, std::string message);
 	
-	void sendPcmData(float* data, size_t size);
-	void onBufferReady(int sampleRate, int nChans, int batchSize, int bufferSize);
+	void sendFloatData(float* data, size_t size);
+	void sendShortData(short* data, size_t size);
+	void onBufferReady(int sampleRate, int nChans, int batchSize, int bufferSize, int bitDepth);
 	
 	void setRoomStatusMessage(std::string);
 	

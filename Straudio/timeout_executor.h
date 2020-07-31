@@ -27,15 +27,16 @@ public:
 		std::thread([&]() {
 			auto _int = _interrupt;
 			auto isRunning = _running;
+			auto wFunc = _workFunc;
 			
 			std::this_thread::sleep_for(std::chrono::milliseconds(_delayMs));
 			
-			if (*_int) {
-				PLOG_DEBUG << "aborting work func";
+			if (*_int == true) {
+				PLOG_DEBUG << "aborting timeout func";
 				*isRunning = false;
 			} else {
-				PLOG_DEBUG << "executing work func";
-				_workFunc();
+				PLOG_DEBUG << "executing timeout func";
+				wFunc();
 			}
 			
 			*isRunning = false;

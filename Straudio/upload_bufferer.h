@@ -6,11 +6,13 @@ private:
 	
 	std::mutex updateLock;
 	
-	float* _streamBuffer = NULL;
+	float* _floatStreamBuffer = NULL;
+	short* _shortStreamBuffer = NULL;
 	int _collectedFrames = 0; // _collected frames == total number samples buffered
 	
-	std::function<void(float*, size_t)> _dataSubmitFunc;
-	std::function<void(int, int, int, int)> _onReadyCb;
+	std::function<void(float*, size_t)> _floatSubmitFunc;
+	std::function<void(short*, size_t)> _shortSubmitFunc;
+	std::function<void(int, int, int, int, int)> _onReadyCb;
 	
 	enum State {
 		UPDATING,
@@ -30,50 +32,69 @@ public:
 	int sampleRate = 0;
 	int nChannels = 0;
 	int batchSize = 0;
+	int bitDepth;
 	
 	/**
 	 nChannels and batchSize probably aren't known when this object is constructed, so these will probably be set in a later processBlock()
 	 or updateSettings().
 	 */
-	PcmUploadBuffer(std::function<void(float*, size_t)> dataSubmitFunc,
-					std::function<void(int, int, int, int)> onReadyCb,
+	PcmUploadBuffer(std::function<void(float*, size_t)> floatSubmitFunc,
+					std::function<void(short*, size_t)> shortSubmitFunc,
+					std::function<void(int, int, int, int, int)> onReadyCb,
 					int sampleR, int buffSize) {
 		_onReadyCb = onReadyCb;
-		_dataSubmitFunc = dataSubmitFunc;
+		_floatSubmitFunc = floatSubmitFunc;
+		_shortSubmitFunc = shortSubmitFunc;
 		
 		int parsedBSize = buffSize < 10 ? PcmUploadBuffer::buffSizeForParamVal(buffSize) : buffSize;
 		bufferSize = parsedBSize;
 		sampleRate = sampleR;
+		bitDepth = 16;
 	}
 	
 	~PcmUploadBuffer() {
-		if (_streamBuffer != NULL) delete _streamBuffer;
+		if (_floatStreamBuffer != NULL) delete _floatStreamBuffer;
+		if (_shortStreamBuffer != NULL) delete _shortStreamBuffer;
 	}
 	
 	void processBlock(iplug::sample** inputs, int nFrames, int nChans) {
 		if (nChans != nChannels || nFrames != batchSize || nFrames > bufferSize) {
 			int bSize = nFrames > bufferSize ? std::max(nFrames, PcmUploadBuffer::MIN_BUFFER_SIZE) : bufferSize;
-			updateSettings(sampleRate, nChans, nFrames,bSize, true);
+			updateSettings(sampleRate, nChans, nFrames, bSize, bitDepth, true);
 		}
 		
 		if (_state != State::READY) return;
 		
-		for (int s = 0; s < nFrames; s++) {
-			for (int c = 0; c < nChans; c++) {
-				_streamBuffer[_collectedFrames] = inputs[c][s];
-				_collectedFrames++;
+		if (bitDepth == 16) {
+			for (int s = 0; s < nFrames; s++) {
+				for (int c = 0; c < nChans; c++) {
+					_shortStreamBuffer[_collectedFrames] = inputs[c][s] * SHRT_MAX;
+					_collectedFrames++;
+				}
+			}
+		} else {
+			for (int s = 0; s < nFrames; s++) {
+				for (int c = 0; c < nChans; c++) {
+					_floatStreamBuffer[_collectedFrames] = inputs[c][s];
+					_collectedFrames++;
+				}
 			}
 		}
 		
-		// we could run into an issue where if in-DAW buffer size is > upload buffer size, this would never trigger
+		
 		if (_collectedFrames == bufferSize * nChannels) {
-			_dataSubmitFunc(_streamBuffer, bufferSize * nChannels * 4); // might be worth have a separate thread to consume?
+			if (bitDepth == 16) {
+				_shortSubmitFunc(_shortStreamBuffer, bufferSize * nChannels * 2);
+			} else {
+				_floatSubmitFunc(_floatStreamBuffer, bufferSize * nChannels * 4);
+			}
+			
 
 			_collectedFrames = 0;
 		}
 	}
 	
-	void updateSettings(int sampleR, int nChans, int batchS, int buffSize, bool notifyOnReady) {
+	void updateSettings(int sampleR, int nChans, int batchS, int buffSize, int bDepth, bool notifyOnReady) {
 		int parsedBSize = buffSize < 10 ? PcmUploadBuffer::buffSizeForParamVal(buffSize) : buffSize;
 		
 		if (parsedBSize < batchS) {
@@ -89,7 +110,8 @@ public:
 		updateLock.lock();
 		_state = UPDATING;
 		
- 		if (sampleR == sampleRate && nChans == nChannels && batchS == batchSize && bufferSize == parsedBSize) {
+ 		if (sampleR == sampleRate && nChans == nChannels && batchS == batchSize
+			&& bufferSize == parsedBSize && bDepth == bitDepth) {
 			PLOG_INFO << "All audio settings are the same. Skipping update";
 			updateLock.unlock();
 			_state = READY;
@@ -103,13 +125,21 @@ public:
 		sampleRate = sampleR;
 		batchSize = batchS;
 		bufferSize = parsedBSize;
+		bitDepth = bDepth;
 		_collectedFrames = 0;
 		
-		if (_streamBuffer != NULL) delete _streamBuffer;
-		_streamBuffer = new float[bufferSize * nChannels];
+		
+		if (bitDepth == 16) {
+			if (_shortStreamBuffer != NULL) delete _shortStreamBuffer;
+			_shortStreamBuffer = new short[bufferSize * nChannels];
+		} else {
+			if (_floatStreamBuffer != NULL) delete _floatStreamBuffer;
+			_floatStreamBuffer = new float[bufferSize * nChannels];
+		}
+		
 		
 		if (nChannels != 0 && sampleRate != 0 && batchSize != 0) {
-			if (notifyOnReady) _onReadyCb(sampleRate, nChannels, batchSize, bufferSize);
+			if (notifyOnReady) _onReadyCb(sampleRate, nChannels, batchSize, bufferSize, bitDepth);
 			_state = READY;
 		} else {
 			_state = MISCONFIGURED;
