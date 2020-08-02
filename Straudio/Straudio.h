@@ -2,17 +2,15 @@
 
 #include "IPlug_include_in_plug_hdr.h"
 #include "web_services_manager.h"
-#include "upload_bufferer.h"
 #include "domain.h"
 #include "logger_init.h"
+#include "upload_buffer.h"
 
 int kNumPrograms = 0;
 
 enum EParams {
     kMonitor = 0,
-	kStream = 1,
-	kUploadBufferSize = 2,
-	kBitDepth = 3,
+	kBitDepth = 1,
     kNumParams
 };
 
@@ -32,14 +30,14 @@ private:
 	void roomStateChange();
 	void onError(std::string severity, std::string message);
 	
-	void sendFloatData(float* data, size_t size);
-	void sendShortData(short* data, size_t size);
-	void onBufferReady(int sampleRate, int nChans, int batchSize, int bufferSize, int bitDepth);
+	template <typename T>
+	void sendData(T* data, size_t size);
+	void onBufferReady(int sampleRate, int nChans, int bitDepth);
 	
 	void setRoomStatusMessage(std::string);
 	
 	std::unique_ptr<WebServicesManager> wsm;
-	std::unique_ptr<PcmUploadBuffer> uploadBuffer;
+	std::unique_ptr<UploadBuffer> uploadBuffer = nullptr;
 	
 	std::shared_ptr<Room> room = Room::CLOSED_PTR();
 	std::shared_ptr<std::string> signalState = std::make_shared<std::string>("closed");

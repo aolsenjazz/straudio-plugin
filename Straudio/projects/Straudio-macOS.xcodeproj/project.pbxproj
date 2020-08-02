@@ -604,8 +604,10 @@
 		4FFBB94120863E9300DDD0E7 /* IPlugVST3_Parameter.h */ = {isa = PBXFileReference; indentWidth = 2; lastKnownFileType = sourcecode.c.h; name = IPlugVST3_Parameter.h; path = ../../../iPlug2/IPlug/VST3/IPlugVST3_Parameter.h; sourceTree = "<group>"; tabWidth = 2; };
 		4FFF72B8214BB71400839091 /* main.rc */ = {isa = PBXFileReference; lastKnownFileType = text; name = main.rc; path = ../resources/main.rc; sourceTree = "<group>"; };
 		AF5A7B6E24CF4D8F00A5FF45 /* logger_init.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = logger_init.h; path = ../logger_init.h; sourceTree = "<group>"; };
+		AF60FC3524D4708C003483D5 /* upload_buffer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = upload_buffer.h; path = ../upload_buffer.h; sourceTree = "<group>"; };
 		AF61A28C24C203BC00559F91 /* http_client.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = http_client.h; path = ../http_client.h; sourceTree = "<group>"; };
 		AF61A28D24C203BC00559F91 /* preferences.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = preferences.h; path = ../preferences.h; sourceTree = "<group>"; };
+		AF62A80A24D5B06800EA918A /* typed_upload_buffer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = typed_upload_buffer.h; path = ../typed_upload_buffer.h; sourceTree = "<group>"; };
 		AF8004F024BD035C00F0EA25 /* audio_propagator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = audio_propagator.h; path = ../audio_propagator.h; sourceTree = "<group>"; };
 		AFAFB68D24BA2CEA00CEE29E /* Straudio.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Straudio.h; path = ../Straudio.h; sourceTree = "<group>"; };
 		AFAFB68E24BA2CEA00CEE29E /* Straudio.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Straudio.cpp; path = ../Straudio.cpp; sourceTree = "<group>"; };
@@ -14888,7 +14890,6 @@
 		AFAFF38524BA2D5900CEE29E /* pcm_gen.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = pcm_gen.h; sourceTree = "<group>"; };
 		AFAFF38624BA2D5900CEE29E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		AFAFF38824BA2D5A00CEE29E /* debug_socket.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = debug_socket.h; sourceTree = "<group>"; };
-		AFBD43F124C9D6A400CADDFE /* upload_bufferer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = upload_bufferer.h; path = ../upload_bufferer.h; sourceTree = "<group>"; };
 		AFC5B12824C0C6B0001C301C /* StraudioTests */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = StraudioTests; sourceTree = BUILT_PRODUCTS_DIR; };
 		AFC66E2C24BA5D9700CB4200 /* peer_connection_manager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = peer_connection_manager.h; path = ../peer_connection_manager.h; sourceTree = "<group>"; };
 		AFCE02C824CF486600960647 /* platform_folders.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = platform_folders.h; sourceTree = "<group>"; };
@@ -14979,7 +14980,8 @@
 				AF61A28D24C203BC00559F91 /* preferences.h */,
 				AFAFB68F24BA2CEA00CEE29E /* signal_service.h */,
 				AFCFF65F24BCA59B006C8F07 /* timeout_executor.h */,
-				AFBD43F124C9D6A400CADDFE /* upload_bufferer.h */,
+				AF62A80A24D5B06800EA918A /* typed_upload_buffer.h */,
+				AF60FC3524D4708C003483D5 /* upload_buffer.h */,
 				AFAFB69024BA2CEA00CEE29E /* web_services_manager.h */,
 				AFAFF37A24BA2D5800CEE29E /* config */,
 				AFAFB6A424BA2D2100CEE29E /* include */,

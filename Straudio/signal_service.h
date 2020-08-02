@@ -209,13 +209,12 @@ public:
 		_ws->close();
 	}
 	
-	void createRoom(int sampleRate, int nChannels, int batchSize, int bitDepth) {
+	void createRoom(int sampleRate, int nChannels, int bitDepth) {
 		nlohmann::json j = {
 			{"displayName", "Host"},
 			{"method", "createRoom"},
 			{"sampleRate", sampleRate},
 			{"nChannels", nChannels},
-			{"batchSize", batchSize},
 			{"bitDepth", bitDepth}
 		};
 		
@@ -248,11 +247,10 @@ public:
 		safeSend(j.dump());
 	}
 	
-	void updateAudioSettings(int sampleRate, int nChannels, int batchSize, int bitDepth) {
+	void updateAudioSettings(int sampleRate, int nChannels, int bitDepth) {
 		nlohmann::json j = {
 			{"sampleRate", sampleRate},
 			{"nChannels", nChannels},
-			{"batchSize", batchSize},
 			{"bitDepth", bitDepth},
 			{"method", "audioDetails"}
 		};

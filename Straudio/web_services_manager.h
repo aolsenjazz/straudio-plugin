@@ -59,12 +59,12 @@ public:
 	}
 	
 	template <typename T>
-	void sendPcmData(T data, size_t size) {
-		pcm->sendAudio(data, size);
+	void sendData(T* data, size_t size) {
+//		pcm->sendAudio(data, size);
 	}
 	
-	void updateAudioSettings(int sampleRate, int nChannels, int bufferSize, int bitDepth) {
-		ss->updateAudioSettings(sampleRate, nChannels, bufferSize, bitDepth);
+	void updateAudioSettings(int sampleRate, int nChannels, int bitDepth) {
+		ss->updateAudioSettings(sampleRate, nChannels, bitDepth);
 	}
 	
 	void closeRtcConnection(std::string clientId) {
