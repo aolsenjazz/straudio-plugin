@@ -1,9 +1,6 @@
 #pragma once
 
 #include "upload_buffer.h"
-#include <chrono>
-
-using namespace std::chrono;
 
 template <typename T>
 class TypedUploadBuffer : public UploadBuffer {
@@ -16,36 +13,16 @@ private:
 	
 	std::function<void(T*, size_t)> _submitFunc;
 	
-	void setBufferLength() {
+	void setBufferSize() {
 		if (sampleRate <= 48000) {
-			bufferLength = std::max(batchSize, 512);
+			bufferSize = std::max(batchSize, 512);
 		} else if (sampleRate <= 96000) {
-			bufferLength = std::max(batchSize, 1024);
+			bufferSize = std::max(batchSize, 1024);
 		} else {
-			bufferLength = std::max(batchSize, 4096);
+			bufferSize = std::max(batchSize, 4096);
 		}
 		
-		int headerSize = sizeof(double) / sizeof(T);
-		bufferLength = bufferLength * nChannels;
-		bufferLength += headerSize;
-		
-		_buffer = new T[bufferLength];
-	}
-	
-	int getFirstPcmIndex() {
-		return sizeof(double) / sizeof(T);
-	}
-	
-	int getBufferSize() {
-		return (bufferLength - getHeaderLength()) * dTypeSize() + getHeaderSize();
-	}
-	
-	int getHeaderSize() {
-		return sizeof(double);
-	}
-	
-	int getHeaderLength() {
-		return sizeof(double) / sizeof(T);
+		_buffer = new T[bufferSize * nChannels];
 	}
 	
 public:
@@ -59,13 +36,12 @@ public:
 	: UploadBuffer(onReadyCb, sampleR) {
 		_onReadyCb = onReadyCb;
 		_submitFunc = submitFunc;
-		_collectedFrames = getFirstPcmIndex();
 		
 		sampleRate = sampleR;
 		nChannels = nChans;
 		batchSize = bSize;
 		
-		setBufferLength();
+		setBufferSize();
 	}
 	
 	~TypedUploadBuffer() {
@@ -99,10 +75,10 @@ public:
 		
 		if (batchSize == 0) {
 			batchSize = nFrames;
-			setBufferLength();
+			setBufferSize();
 		}
 		
-		if (bufferLength == 0) {
+		if (bufferSize == 0) {
 			return;
 		}
 	
@@ -122,18 +98,9 @@ public:
 			}
 			
 			// Upload once buffer is full
-			if (_collectedFrames == bufferLength) {
-				double d = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
-				double* dptr = (double*) &_buffer[0];
-				*dptr = d;
-				
-				
-				
-//				PLOG_INFO << ((double) _buffer[0]);
-				
-//				PLOG_INFO << d2;
-				_submitFunc(_buffer, getBufferSize());
-				_collectedFrames = getFirstPcmIndex();
+			if (_collectedFrames == bufferSize * nChannels) {
+				_submitFunc(_buffer, bufferSize * nChannels * dTypeSize());
+				_collectedFrames = 0;
 			}
 		}
 	}

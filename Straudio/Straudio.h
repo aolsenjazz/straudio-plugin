@@ -35,13 +35,14 @@ private:
 	void onBufferReady(int sampleRate, int nChans, int bitDepth);
 	
 	void setRoomStatusMessage(std::string);
+	void createRoom();
 	
-	std::unique_ptr<WebServicesManager> wsm;
+	std::unique_ptr<WebServicesManager> wsm = nullptr;
 	std::unique_ptr<UploadBuffer> uploadBuffer = nullptr;
 	
 	std::shared_ptr<Room> room = Room::CLOSED_PTR();
 	std::shared_ptr<std::string> signalState = std::make_shared<std::string>("closed");
 	
-	std::unique_ptr<std::string> roomMsg = std::make_unique<std::string>("Creating room...");
+	std::unique_ptr<std::string> roomMsg = std::make_unique<std::string>("");
 	
 };

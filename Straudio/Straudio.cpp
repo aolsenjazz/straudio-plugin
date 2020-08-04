@@ -20,13 +20,6 @@ Straudio::Straudio(const iplug::InstanceInfo& info)
 	GetParam(kMonitor)->InitBool("Monitor", false);
 	GetParam(kBitDepth)->InitEnum("Bit Depth", 0, 2, "", iplug::IParam::kFlagsNone, "", "16 bit", "32 bit");
 	
-	auto boundSigStateChange = std::bind(&Straudio::signalStateChange, this);
-	auto boundRoomStateChange = std::bind(&Straudio::roomStateChange, this);
-	auto boundOnError = std::bind(&Straudio::onError, this, _1, _2);
-	wsm = std::make_unique<WebServicesManager>(room, signalState, boundSigStateChange,
-											   boundRoomStateChange, boundOnError);
-	wsm->connectToSignalling();
-	
 	auto boundSend = std::bind(&Straudio::sendData<short>, this, _1, _2);
 	auto boundUpdateAudio = std::bind(&Straudio::onBufferReady, this, _1, _2, _3);
 	uploadBuffer = std::make_unique<TypedUploadBuffer<short>>(boundSend, boundUpdateAudio, GetSampleRate());
@@ -42,12 +35,15 @@ Straudio::Straudio(const iplug::InstanceInfo& info)
 		const iplug::igraphics::IRECT root = pGraphics->GetBounds();
 		const iplug::igraphics::IRECT monitorCtrlRect = root.GetFromBRHC(250, 100);
 		const iplug::igraphics::IRECT bitDepthRect = root.GetFromTRHC(250, 100);
+		const iplug::igraphics::IRECT createRect = root.GetFromTLHC(250, 100);
 		
 		pGraphics->AttachControl(new iplug::igraphics::ITextControl(root.GetMidVPadded(50), roomMsg->c_str(), iplug::igraphics::IText(50)), 69);
 		
 		pGraphics->AttachControl(new iplug::igraphics::ICaptionControl(bitDepthRect, kBitDepth, iplug::igraphics::IText(24.f), iplug::igraphics::DEFAULT_FGCOLOR, false), 80085, "misccontrols");
 		
 		pGraphics->AttachControl(new iplug::igraphics::IVToggleControl(monitorCtrlRect, kMonitor, "Monitor", iplug::igraphics::DEFAULT_STYLE, "Off", "On"));
+		
+		pGraphics->AttachControl(new iplug::igraphics::IVButtonControl(createRect, std::bind(&Straudio::createRoom, this),"Create room"));
 	  };
 }
 
@@ -75,17 +71,7 @@ void Straudio::OnActivate(bool active) {
 void Straudio::OnReset() {
 	PLOG_INFO << "OnReset()";
 	
-	auto boundUpdateAudio = std::bind(&Straudio::onBufferReady, this, _1, _2, _3);
-	int sr = GetSampleRate();
-	int bd = 16 * GetParam(kBitDepth)->Int() + 16;
-	
-	if (bd == 16) {
-		auto boundSend = std::bind(&Straudio::sendData<short>, this, _1, _2);
-		uploadBuffer.reset(new TypedUploadBuffer<short>(boundSend, boundUpdateAudio, sr));
-	} else {
-		auto boundSend = std::bind(&Straudio::sendData<float>, this, _1, _2);
-		uploadBuffer.reset(new TypedUploadBuffer<float>(boundSend, boundUpdateAudio, sr));
-	}
+	if (wsm != nullptr) wsm->notifyBufferReset();
 }
 
 void Straudio::onError(std::string severity, std::string message) {
@@ -112,7 +98,7 @@ void Straudio::OnParamChange(int paramIdx) {
 				uploadBuffer.reset(new TypedUploadBuffer<float>(boundSend, boundUpdateAudio, sr, nc, bs));
 			}
 			
-			wsm->updateAudioSettings(sr, nc, bd);
+			if (wsm != nullptr) wsm->updateAudioSettings(sr, nc, bd);
 			
 			break;
 		}
@@ -123,7 +109,7 @@ void Straudio::signalStateChange() {
 	PLOG_INFO << "Connection state change. State: " << *signalState;
 	
 	if (*signalState == "open") {
-		wsm->ss->createRoom(uploadBuffer->sampleRate, uploadBuffer->nChannels, uploadBuffer->bitDepth());
+		
 	} else {
 		wsm->closePeerConnections(); // something happened with the connection. close peer connections
 		setRoomStatusMessage("Disconnected...");
@@ -146,7 +132,8 @@ void Straudio::roomStateChange() {
 void Straudio::onBufferReady(int sampleRate, int nChans, int bitDepth) {
 	if (room->state == "open" && *signalState == "open") {
 		PLOG_INFO << "Audio details changed. Updating server info...";
-		wsm->updateAudioSettings(sampleRate, nChans, bitDepth);
+		
+		if (wsm != nullptr) wsm->updateAudioSettings(sampleRate, nChans, bitDepth);
 	} else {
 		PLOG_DEBUG << "Tried to send audio details while room || signal != open. Ignoring...";
 	}
@@ -163,7 +150,9 @@ void Straudio::ProcessBlock(iplug::sample** inputs, iplug::sample** outputs, int
 
 template <typename T>
 void Straudio::sendData(T* data, size_t size) {
-	wsm->sendData(data, size);
+	if (wsm != nullptr) {
+		wsm->sendData(data, size);
+	}
 }
 
 void Straudio::setRoomStatusMessage(std::string msg) {
@@ -173,5 +162,22 @@ void Straudio::setRoomStatusMessage(std::string msg) {
 		// refactor this nonsense (carefully, when you have the time)
 		char const *formatted = roomMsg->c_str();
 		((iplug::igraphics::ITextControl*) GetUI()->GetControlWithTag(69))->SetStr(formatted);
+	}
+}
+
+void Straudio::createRoom() {
+	if (wsm == nullptr) {
+		auto boundSigStateChange = std::bind(&Straudio::signalStateChange, this);
+		auto boundRoomStateChange = std::bind(&Straudio::roomStateChange, this);
+		auto boundOnError = std::bind(&Straudio::onError, this, _1, _2);
+		wsm = std::make_unique<WebServicesManager>(room, signalState, boundSigStateChange,
+												   boundRoomStateChange, boundOnError);
+		wsm->connectToSignalling();
+		
+		while (!wsm->ss->isOpen()) {}
+		
+		wsm->ss->createRoom(uploadBuffer->sampleRate, uploadBuffer->nChannels, uploadBuffer->bitDepth());
+	} else {
+		wsm->ss->createRoom(uploadBuffer->sampleRate, uploadBuffer->nChannels, uploadBuffer->bitDepth());
 	}
 }

@@ -60,7 +60,11 @@ public:
 	
 	template <typename T>
 	void sendData(T* data, size_t size) {
-//		pcm->sendAudio(data, size);
+		pcm->sendAudio(data, size);
+	}
+	
+	void notifyBufferReset() {
+		ss->notifyBufferReset();
 	}
 	
 	void updateAudioSettings(int sampleRate, int nChannels, int bitDepth) {

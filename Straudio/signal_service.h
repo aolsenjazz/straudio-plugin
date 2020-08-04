@@ -209,6 +209,10 @@ public:
 		_ws->close();
 	}
 	
+	bool isOpen() {
+		return _ws->isOpen();
+	}
+	
 	void createRoom(int sampleRate, int nChannels, int bitDepth) {
 		nlohmann::json j = {
 			{"displayName", "Host"},
@@ -253,6 +257,14 @@ public:
 			{"nChannels", nChannels},
 			{"bitDepth", bitDepth},
 			{"method", "audioDetails"}
+		};
+		
+		safeSend(j.dump());
+	}
+	
+	void notifyBufferReset() {
+		nlohmann::json j = {
+			{"method", "bufferReset"}
 		};
 		
 		safeSend(j.dump());

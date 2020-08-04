@@ -83,8 +83,7 @@ public:
 	}
 	
 	template <typename T>
-	void sendAudio(T data, size_t size) {
-		// might be nice to have a thread pool to send data to different clients
+	void sendAudio(T* data, size_t size) {
 		for (const auto & [targetId, dc] : _dataChannels) {
 			if (dc->isOpen()) {
 				dc->send((rtc::byte*) data, size);
