@@ -14,10 +14,8 @@
 class SignalService {
 
 private:
-	
-//	std::shared_ptr<rtc::WebSocket> _ws;
+
 	ix::WebSocket webSocket;
-	std::unique_ptr<IntervalExecutor> _reconnectExecutor;
 	std::unique_ptr<TimeoutExecutor> _heartbeatExecutor = nullptr;
 	
 	std::shared_ptr<Room> room;
@@ -30,25 +28,32 @@ private:
 	std::function<void(std::string, std::string, std::string)> _remoteCandidateCb;
 	std::function<void(std::string)> _closeRtcCb;
 	
-	bool keepAlive = true;
 	bool destructing = false;
 	
 	void _onOpen() {
 		PLOG_DEBUG << "websocket open";
-//		_ws->setPingCallbacks(std::bind(&SignalService::onSendPing, this),
-//							  std::bind(&SignalService::onReceivePing, this));
-		
 		
 		*signalState = "open";
 		_signalStateChangeCb();
 	}
 	
-	void onSendPing() {
-		// this is useless rn
+	void _onClose() {
+		PLOG_DEBUG << "websocket closed";
+		
+		if (destructing) return; // if object is destructing, run callbacks
+		
+		room->state = "closed";
+		*signalState = "closed";
+		_signalStateChangeCb();
 	}
 	
-	void onReceivePing() {
-		PLOG_DEBUG << "pong received";
+	void _onError(const std::string &error) {
+		_errorCb("warn", error);
+	}
+	
+	void _onPing() {
+		PLOG_DEBUG << "ping received";
+		
 		
 		if (_heartbeatExecutor != nullptr) {
 			_heartbeatExecutor->interrupt();
@@ -58,30 +63,8 @@ private:
 		_heartbeatExecutor->start();
 	}
 	
-	void _onClose() {
-		PLOG_DEBUG << "websocket closed";
-		
-		if (destructing) return; // if object is destructing, don't reconnect WS
-		
-		room->state = "closed";
-		*signalState = "closed";
-		_signalStateChangeCb();
-		
-		_reconnectExecutor->start();
-	}
-	
-	void _onError(const std::string &error) {
-		_errorCb("warn", error);
-	}
-	
 	void _onMessage(std::string message) {
-//		if (_heartbeatExecutor != nullptr) {
-//			_heartbeatExecutor->interrupt();
-//		}
-		
-//		if (auto* str_msg = std::get_if<std::string>(&message)) {
 		auto j = nlohmann::json::parse(message);
-		
 		auto method = j["method"].get<std::string>();
 
 		if (method == "audioDetailsResponse")     _onAudioDetailsResponse(j);
@@ -94,13 +77,8 @@ private:
 		else if (method == "rejoinRoomResponse")  _onRejoinResponse(j);
 		else if (method == "createRoomResponse")  _onCreateRoomResponse(j);
 		else PLOG_INFO << "Unknown method: " << method;
-			
-//		} else {
-//			PLOG_ERROR << "Recevied message is not a string. This shouldn't happen.";
-//		}
 	}
 	
-	// For now, these are noop
 	void _onClientJoin(nlohmann::json j) {
 		std::string clientId = j["client"]["id"].get<std::string>();
 		PLOG_INFO << "Client[" << clientId << "] joined room";
@@ -112,7 +90,6 @@ private:
 		
 		_closeRtcCb(clientId);
 	}
-	
 	
 	void _onCreateRoomResponse(nlohmann::json j) {
 		bool success = j["success"].get<bool>();
@@ -175,63 +152,38 @@ public:
 		os << (USE_TLS ? "wss://" : "ws://") << SIGNAL_HOST << ":" << SIGNAL_PORT << "/";
 		url = os.str();
 		
-		std::string url("wss://straud.io:4443");
 		webSocket.setUrl(url);
 		
-//		rtc::WebSocket::Configuration config;
-//		config.disableTlsVerification = true;
-//		_ws = std::make_shared<rtc::WebSocket>(config);
+		webSocket.setOnMessageCallback([&](const ix::WebSocketMessagePtr& msg) {
+			if        (msg->type == ix::WebSocketMessageType::Message) {
+				_onMessage(msg->str);
+			} else if (msg->type == ix::WebSocketMessageType::Open) {
+				_onOpen();
+			} else if (msg->type == ix::WebSocketMessageType::Close) {
+				_onClose();
+			} else if (msg->type == ix::WebSocketMessageType::Error) {
+				_onError(msg->errorInfo.reason);
+			} else if (msg->type == ix::WebSocketMessageType::Ping) {
+				_onPing();
+			}
+		});
 		
-//		auto workFunc = std::bind(&SignalService::connect, this);
-//		auto runWhile = std::bind(&rtc::WebSocket::isClosed, _ws);
-//		_reconnectExecutor = std::make_unique<IntervalExecutor>(1000 , workFunc, runWhile);
+		webSocket.start();
 	}
 	
 	~SignalService() {
 		destructing = true;
 		
 		if (_heartbeatExecutor != nullptr) _heartbeatExecutor->interrupt();
-		if (_reconnectExecutor != nullptr) _reconnectExecutor->stop();
 		
-//		_ws->close();
-	}
-	
-	void tryToConnect() {
-		
-		webSocket.setOnMessageCallback([&](const ix::WebSocketMessagePtr& msg) {
-				if (msg->type == ix::WebSocketMessageType::Message) {
-					_onMessage(msg->str);
-				}
-				else if (msg->type == ix::WebSocketMessageType::Open) {
-					std::cout << "Connection established" << std::endl;
-				}
-			}
-		);
-		
-		webSocket.start();
-		
-//		_reconnectExecutor->start();
-	}
-	
-	void connect() {
-//		try {
-//			_ws->open(url);
-//			_ws->onOpen(std::bind(&SignalService::_onOpen, this));
-//			_ws->onMessage(std::bind(&SignalService::_onMessage, this, std::placeholders::_1));
-//			_ws->onClosed(std::bind(&SignalService::_onClose, this));
-//			_ws->onError(std::bind(&SignalService::_onError, this, std::placeholders::_1));
-//		} catch (const std::exception& e) {
-//			PLOG_ERROR << "Failed to open websocket: " << e.what();
-//		}
+		webSocket.close();
 	}
 	
 	void close() {
 		webSocket.close();
-//		_ws->close();
 	}
 	
 	bool isOpen() {
-//		return _ws->isOpen();
 		return webSocket.getReadyState() == ix::ReadyState::Open;
 	}
 	
@@ -294,10 +246,5 @@ public:
 	
 	void safeSend(std::string data) {
 		webSocket.sendText(data);
-//		if (_ws->readyState() == rtc::WebSocket::State::Open) {
-//			_ws->send(data);
-//		} else {
-//			PLOG_WARNING << "Tried to call ws->send() in incorrect State";
-//		}
 	}
 };

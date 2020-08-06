@@ -2,7 +2,7 @@
 #define PLUG_NAME "Straudio"
 #define PLUG_MFR "AlexanderOlsen"
 #define PLUG_VERSION_HEX 0x00010000
-#define PLUG_VERSION_STR "1.0.2"
+#define PLUG_VERSION_STR "0.1.0"
 #define PLUG_UNIQUE_ID 'Nvem'
 #define PLUG_MFR_ID 'Aofx'
 #define PLUG_URL_STR "https://www.instagram.com/alex.olsen"

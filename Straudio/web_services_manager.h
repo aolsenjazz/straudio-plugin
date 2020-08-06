@@ -78,8 +78,4 @@ public:
 	void closePeerConnections() {
 		pcm->reset();
 	}
-	
-	void connectToSignalling() {
-		ss->tryToConnect();
-	}
 };

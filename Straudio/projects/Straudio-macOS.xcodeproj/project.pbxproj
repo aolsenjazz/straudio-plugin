@@ -183,6 +183,15 @@
 		AFAA48EF24DC8D040027052B /* libixwebsocket.a in Frameworks */ = {isa = PBXBuildFile; fileRef = AFAA48EE24DC8CFF0027052B /* libixwebsocket.a */; };
 		AFAA48F224DC8D920027052B /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AFAA48F024DC8D8F0027052B /* Security.framework */; };
 		AFAA48F324DC8D920027052B /* Security.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = AFAA48F024DC8D8F0027052B /* Security.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		AFAA48F724DCA2E20027052B /* libixwebsocket.a in Frameworks */ = {isa = PBXBuildFile; fileRef = AFAA48F624DCA2DE0027052B /* libixwebsocket.a */; };
+		AFAA48F824DCA2E60027052B /* libixwebsocket.a in Frameworks */ = {isa = PBXBuildFile; fileRef = AFAA48F624DCA2DE0027052B /* libixwebsocket.a */; };
+		AFAA48F924DCA2EA0027052B /* libixwebsocket.a in Frameworks */ = {isa = PBXBuildFile; fileRef = AFAA48F624DCA2DE0027052B /* libixwebsocket.a */; };
+		AFAA48FD24DCA33B0027052B /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AFAA48F024DC8D8F0027052B /* Security.framework */; };
+		AFAA48FE24DCA33B0027052B /* Security.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = AFAA48F024DC8D8F0027052B /* Security.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		AFAA490024DCA33E0027052B /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AFAA48F024DC8D8F0027052B /* Security.framework */; };
+		AFAA490124DCA33E0027052B /* Security.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = AFAA48F024DC8D8F0027052B /* Security.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		AFAA490324DCA3400027052B /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AFAA48F024DC8D8F0027052B /* Security.framework */; };
+		AFAA490424DCA3400027052B /* Security.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = AFAA48F024DC8D8F0027052B /* Security.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		AFBD43EF24C8785700CADDFE /* libdatachannel-static.a in Frameworks */ = {isa = PBXBuildFile; fileRef = AFAFB69F24BA2D2100CEE29E /* libdatachannel-static.a */; };
 		AFC5B13024C0C6DB001C301C /* tests.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AFAFF38424BA2D5900CEE29E /* tests.cpp */; };
 		AFCE02CA24CF486600960647 /* platform_folders.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AFCE02C924CF486600960647 /* platform_folders.cpp */; };
@@ -239,6 +248,39 @@
 			dstSubfolderSpec = 10;
 			files = (
 				AFAA48F324DC8D920027052B /* Security.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AFAA48FF24DCA33B0027052B /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				AFAA48FE24DCA33B0027052B /* Security.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AFAA490224DCA33E0027052B /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				AFAA490124DCA33E0027052B /* Security.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AFAA490524DCA3400027052B /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				AFAA490424DCA3400027052B /* Security.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -626,9 +668,9 @@
 		AFAA48EE24DC8CFF0027052B /* libixwebsocket.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libixwebsocket.a; path = ../../../IXWebSocket/build/libixwebsocket.a; sourceTree = "<group>"; };
 		AFAA48F024DC8D8F0027052B /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 		AFAA48F524DC95930027052B /* ix_signal_service.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ix_signal_service.h; path = ../ix_signal_service.h; sourceTree = "<group>"; };
+		AFAA48F624DCA2DE0027052B /* libixwebsocket.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libixwebsocket.a; path = ../lib/libixwebsocket.a; sourceTree = "<group>"; };
 		AFAFB68D24BA2CEA00CEE29E /* Straudio.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Straudio.h; path = ../Straudio.h; sourceTree = "<group>"; };
 		AFAFB68E24BA2CEA00CEE29E /* Straudio.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Straudio.cpp; path = ../Straudio.cpp; sourceTree = "<group>"; };
-		AFAFB68F24BA2CEA00CEE29E /* signal_service.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = signal_service.h; path = ../signal_service.h; sourceTree = "<group>"; };
 		AFAFB69024BA2CEA00CEE29E /* web_services_manager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = web_services_manager.h; path = ../web_services_manager.h; sourceTree = "<group>"; };
 		AFAFB69224BA2CEA00CEE29E /* config.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = config.h; path = ../config.h; sourceTree = "<group>"; };
 		AFAFB69324BA2CEA00CEE29E /* domain.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = domain.h; path = ../domain.h; sourceTree = "<group>"; };
@@ -14926,8 +14968,10 @@
 				AF8531EA24BA303500EC7952 /* libcrypto.a in Frameworks */,
 				AF8531EB24BA303500EC7952 /* libdatachannel-static.a in Frameworks */,
 				AF8531EC24BA303500EC7952 /* libjuice-static.a in Frameworks */,
+				AFAA48F724DCA2E20027052B /* libixwebsocket.a in Frameworks */,
 				AF8531ED24BA303500EC7952 /* libnettle.a in Frameworks */,
 				AF8531EE24BA303500EC7952 /* libssl.a in Frameworks */,
+				AFAA490324DCA3400027052B /* Security.framework in Frameworks */,
 				AF8531EF24BA303500EC7952 /* libusrsctp.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -14942,6 +14986,8 @@
 				AF8531F924BA303F00EC7952 /* libnettle.a in Frameworks */,
 				AF8531FA24BA303F00EC7952 /* libssl.a in Frameworks */,
 				AF8531FB24BA303F00EC7952 /* libusrsctp.a in Frameworks */,
+				AFAA48F924DCA2EA0027052B /* libixwebsocket.a in Frameworks */,
+				AFAA48FD24DCA33B0027052B /* Security.framework in Frameworks */,
 				4F815999205D525A00393585 /* libAAXLibrary_libcpp.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -14953,8 +14999,10 @@
 				AF8531F024BA303800EC7952 /* libcrypto.a in Frameworks */,
 				AF8531F124BA303800EC7952 /* libdatachannel-static.a in Frameworks */,
 				AF8531F224BA303800EC7952 /* libjuice-static.a in Frameworks */,
+				AFAA48F824DCA2E60027052B /* libixwebsocket.a in Frameworks */,
 				AF8531F324BA303800EC7952 /* libnettle.a in Frameworks */,
 				AF8531F424BA303800EC7952 /* libssl.a in Frameworks */,
+				AFAA490024DCA33E0027052B /* Security.framework in Frameworks */,
 				AF8531F524BA303800EC7952 /* libusrsctp.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -14997,7 +15045,6 @@
 				AF5A7B6E24CF4D8F00A5FF45 /* logger_init.h */,
 				AFC66E2C24BA5D9700CB4200 /* peer_connection_manager.h */,
 				AF61A28D24C203BC00559F91 /* preferences.h */,
-				AFAFB68F24BA2CEA00CEE29E /* signal_service.h */,
 				AFAA48F524DC95930027052B /* ix_signal_service.h */,
 				AFCFF65F24BCA59B006C8F07 /* timeout_executor.h */,
 				AF62A80A24D5B06800EA918A /* typed_upload_buffer.h */,
@@ -15020,6 +15067,7 @@
 		089C1671FE841209C02AAC07 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				AFAA48F624DCA2DE0027052B /* libixwebsocket.a */,
 				AFAA48F024DC8D8F0027052B /* Security.framework */,
 				AFAA48EE24DC8CFF0027052B /* libixwebsocket.a */,
 				4F03A54820A461FD00EBDFFB /* IGraphics */,
@@ -39623,6 +39671,7 @@
 				4F3AE1DA12C0E5E2001FD7A4 /* Rez */,
 				4F744D4C14005ADA002FAD90 /* Run Script - clear_audiounit_caches.sh */,
 				4FBDD26520A319580054B111 /* Frameworks */,
+				AFAA490224DCA33E0027052B /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -39641,6 +39690,7 @@
 				4F9828AF140A9EB700F3FCC1 /* Resources */,
 				4F9828B5140A9EB700F3FCC1 /* Sources */,
 				4F9828D7140A9EB700F3FCC1 /* Frameworks */,
+				AFAA490524DCA3400027052B /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -39660,6 +39710,7 @@
 				4FB600151567CB0A0020189A /* Resources */,
 				4FB600171567CB0A0020189A /* Sources */,
 				4FB6002A1567CB0A0020189A /* Frameworks */,
+				AFAA48FF24DCA33B0027052B /* Embed Frameworks */,
 			);
 			buildRules = (
 			);

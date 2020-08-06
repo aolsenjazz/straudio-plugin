@@ -35,7 +35,6 @@ private:
 	void onBufferReady(int sampleRate, int nChans, int bitDepth);
 	
 	void setRoomStatusMessage(std::string);
-	void createRoom();
 	
 	std::unique_ptr<WebServicesManager> wsm = nullptr;
 	std::unique_ptr<UploadBuffer> uploadBuffer = nullptr;

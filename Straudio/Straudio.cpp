@@ -18,7 +18,7 @@ Straudio::Straudio(const iplug::InstanceInfo& info)
 	ix::initNetSystem();
 
 	GetParam(kMonitor)->InitBool("Monitor", false);
-	GetParam(kBitDepth)->InitEnum("Bit Depth", 0, 2, "", iplug::IParam::kFlagsNone, "", "16 bit", "32 bit");
+	GetParam(kBitDepth)->InitEnum("Bit Depth", 1, 2, "", iplug::IParam::kFlagsNone, "", "16 bit", "32 bit");
 	
 	
 	auto boundSigStateChange = std::bind(&Straudio::signalStateChange, this);
@@ -27,9 +27,9 @@ Straudio::Straudio(const iplug::InstanceInfo& info)
 	wsm = std::make_unique<WebServicesManager>(room, signalState, boundSigStateChange,
 											   boundRoomStateChange, boundOnError);
 	
-	auto boundSend = std::bind(&Straudio::sendData<short>, this, _1, _2);
+	auto boundSend = std::bind(&Straudio::sendData<float>, this, _1, _2);
 	auto boundUpdateAudio = std::bind(&Straudio::onBufferReady, this, _1, _2, _3);
-	uploadBuffer = std::make_unique<TypedUploadBuffer<short>>(boundSend, boundUpdateAudio, GetSampleRate());
+	uploadBuffer = std::make_unique<TypedUploadBuffer<float>>(boundSend, boundUpdateAudio, GetSampleRate());
 	
 	mMakeGraphicsFunc = [&]() {
 		return MakeGraphics(*this, PLUG_WIDTH, PLUG_HEIGHT, PLUG_FPS, GetScaleForScreen(PLUG_HEIGHT));
@@ -42,15 +42,12 @@ Straudio::Straudio(const iplug::InstanceInfo& info)
 		const iplug::igraphics::IRECT root = pGraphics->GetBounds();
 		const iplug::igraphics::IRECT monitorCtrlRect = root.GetFromBRHC(250, 100);
 		const iplug::igraphics::IRECT bitDepthRect = root.GetFromTRHC(250, 100);
-		const iplug::igraphics::IRECT createRect = root.GetFromTLHC(250, 100);
 		
 		pGraphics->AttachControl(new iplug::igraphics::ITextControl(root.GetMidVPadded(50), roomMsg->c_str(), iplug::igraphics::IText(50)), 69);
 		
 		pGraphics->AttachControl(new iplug::igraphics::ICaptionControl(bitDepthRect, kBitDepth, iplug::igraphics::IText(24.f), iplug::igraphics::DEFAULT_FGCOLOR, false), 80085, "misccontrols");
 		
 		pGraphics->AttachControl(new iplug::igraphics::IVToggleControl(monitorCtrlRect, kMonitor, "Monitor", iplug::igraphics::DEFAULT_STYLE, "Off", "On"));
-		
-		pGraphics->AttachControl(new iplug::igraphics::IVButtonControl(createRect, std::bind(&Straudio::createRoom, this),"Create room"));
 	  };
 }
 
@@ -154,13 +151,5 @@ void Straudio::setRoomStatusMessage(std::string msg) {
 		// refactor this nonsense (carefully, when you have the time)
 		char const *formatted = roomMsg->c_str();
 		((iplug::igraphics::ITextControl*) GetUI()->GetControlWithTag(69))->SetStr(formatted);
-	}
-}
-
-void Straudio::createRoom() {
-	if (wsm->ss->isOpen()) {
-		wsm->ss->createRoom(uploadBuffer->sampleRate, uploadBuffer->nChannels, uploadBuffer->bitDepth());
-	} else {
-		wsm->connectToSignalling();
 	}
 }
