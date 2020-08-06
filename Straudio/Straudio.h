@@ -43,6 +43,6 @@ private:
 	std::shared_ptr<Room> room = Room::CLOSED_PTR();
 	std::shared_ptr<std::string> signalState = std::make_shared<std::string>("closed");
 	
-	std::unique_ptr<std::string> roomMsg = std::make_unique<std::string>("");
+	std::unique_ptr<std::string> roomMsg = std::make_unique<std::string>("Sanity");
 	
 };

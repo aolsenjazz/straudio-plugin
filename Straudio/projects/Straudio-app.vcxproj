@@ -226,7 +226,7 @@
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>juice_static.lib;platform_folders.lib;libcrypto_static.lib;libssl_static.lib;usrsctp.lib;datachannel_static.lib;$(APP_LIBS);%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>crypt32.lib;ixwebsocket.lib;juice_static.lib;platform_folders.lib;libcrypto_static.lib;libssl_static.lib;usrsctp.lib;datachannel_static.lib;$(APP_LIBS);%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Windows</SubSystem>
       <AdditionalLibraryDirectories>$(SolutionDir)lib\release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
@@ -350,10 +350,12 @@
     <ClInclude Include="..\preferences.h" />
     <ClInclude Include="..\Straudio.h" />
     <ClInclude Include="..\resources\resource.h" />
+    <ClInclude Include="..\typed_upload_buffer.h" />
     <ClInclude Include="..\ui\AudioInfoPanel.h" />
     <ClInclude Include="..\ui\LoginPanel.h" />
     <ClInclude Include="..\ui\MonitorControl.h" />
     <ClInclude Include="..\ui\StreamControl.h" />
+    <ClInclude Include="..\upload_buffer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\iPlug2\Dependencies\IPlug\RTAudio\include\asio.cpp" />

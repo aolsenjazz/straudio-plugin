@@ -276,7 +276,7 @@
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>juice_static_d.lib;libcrypto_static.lib;platform_folders_d.lib;libssl_static.lib;usrsctp_d.lib;datachannel_static_d.lib;$(AAX_LIBS);%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>ixwebsocket.lib;crypt32.lib;juice_static_d.lib;libcrypto_static.lib;platform_folders_d.lib;libssl_static.lib;usrsctp_d.lib;datachannel_static_d.lib;$(AAX_LIBS);%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(BINARY_NAME).aaxplugin</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AssemblyDebug>
@@ -325,7 +325,7 @@
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>datachannel_static.lib;platform_folders.lib;juice_static.lib;libcrypto_static.lib;libssl_static.lib;usrsctp.lib;$(AAX_LIBS);%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>ixwebsocket.lib;crypt32.lib;datachannel_static.lib;platform_folders.lib;juice_static.lib;libcrypto_static.lib;libssl_static.lib;usrsctp.lib;$(AAX_LIBS);%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(BINARY_NAME).aaxplugin</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <SubSystem>Windows</SubSystem>

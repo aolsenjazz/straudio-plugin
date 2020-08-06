@@ -15,6 +15,8 @@ using namespace std::placeholders;
 
 Straudio::Straudio(const iplug::InstanceInfo& info)
 : iplug::Plugin(info, iplug::MakeConfig(kNumParams, kNumPrograms)) {
+	ix::initNetSystem();
+
 	GetParam(kMonitor)->InitBool("Monitor", false);
 	GetParam(kBitDepth)->InitEnum("Bit Depth", 0, 2, "", iplug::IParam::kFlagsNone, "", "16 bit", "32 bit");
 	

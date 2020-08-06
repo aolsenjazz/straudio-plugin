@@ -317,6 +317,8 @@
     <ClInclude Include="..\ui\LoginPanel.h">
       <Filter>ui</Filter>
     </ClInclude>
+    <ClInclude Include="..\upload_buffer.h" />
+    <ClInclude Include="..\typed_upload_buffer.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="resources">
