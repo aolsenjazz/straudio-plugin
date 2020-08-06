@@ -1,3 +1,17 @@
+/**
+ Custom buffers for sending PCM data to each client. Reuses the same buffer _buffer<T> to avoid uncessary allocation of memory.
+ Each buffer contains a header consisting of metadata related to the PCM, and a body consisting of PCM data. Each message
+ is structured as such:
+ 
+ __________________
+ | 8 bytes timestamp|
+ |_________________|
+ | 8 bytes dtype        | DTYPE_INT16 or DTYPE_FLOAT32
+ |_________________|
+ |0-8192 bytes PCM|
+ |_________________|
+ */
+
 #pragma once
 
 #include "upload_buffer.h"
@@ -10,74 +24,76 @@ class TypedUploadBuffer : public UploadBuffer {
 	
 private:
 	
-	T* _buffer = NULL;
+	/**
+	 Sent as second part of header. Informs clients of how to transform data
+	 */
+	const double DTYPE_INT16 = 0;
 	
-	int dtypeMultiplier;
+	/**
+	Sent as second part of header. Informs clients of how to transform data
+	*/
+	const double DTYPE_FLOAT32 = 1;
+	
+	/**
+	 20000 is an arbitrary size. As long as size is > 8200, shouldn't matter much
+	 */
+	T _buffer[20000];
 	
 	std::function<void(T*, size_t)> _submitFunc;
 	
-	void setBufferLength() {
-		if (sampleRate <= 48000) {
-			bufferLength = std::max(batchSize, 512);
-		} else if (sampleRate <= 96000) {
-			bufferLength = std::max(batchSize, 1024);
-		} else {
-			bufferLength = std::max(batchSize, 4096);
+	int getTimestampIndex() {
+		return 0;
+	}
+	
+	/**
+	 Returns the index of the data type portion of header
+	 */
+	int getDTypeIndex() {
+		return getTimestampLength();
+	}
+	
+	/**
+	 Returns the first index in buffer at which PCM data starts
+	 */
+	int getBodyIndex() {
+		return getHeaderSize() / sizeof(T);
+	}
+	
+	/**
+	 Returns size in bytes of header portion of buffer
+	 */
+	int getHeaderSize() {
+		// "sizeof timestamp" plus "sizeof data type"
+		return sizeof(double) + sizeof(double);
+	}
+	
+	/**
+	 Returns the length (in number of T) of the timestamp. E.g. for T=float32, this will return 2
+	 */
+	int getTimestampLength() {
+		return sizeof(double) / sizeof(T);
+	}
+	
+	/**
+	 Returns the data type to send to the client.
+	 */
+	int getDTypeBufferVal() {
+		if constexpr (std::is_same_v<T, short>) {
+			return DTYPE_INT16;
 		}
 		
-		int headerSize = sizeof(double) / sizeof(T);
-		bufferLength = bufferLength * nChannels;
-		bufferLength += headerSize;
-		
-		_buffer = new T[bufferLength];
-	}
-	
-	int getFirstPcmIndex() {
-		return sizeof(double) / sizeof(T);
-	}
-	
-	int getBufferSize() {
-		return (bufferLength - getHeaderLength()) * dTypeSize() + getHeaderSize();
-	}
-	
-	int getHeaderSize() {
-		return sizeof(double);
-	}
-	
-	int getHeaderLength() {
-		return sizeof(double) / sizeof(T);
+		return DTYPE_FLOAT32;
 	}
 	
 public:
 	
-	/**
-	 nChannels and batchSize probably aren't known when this object is constructed, so these will probably be set in a later processBlock()
-	 or updateSettings().
-	 */
-	TypedUploadBuffer(std::function<void(T*, size_t)> submitFunc, std::function<void(int, int, int)> onReadyCb,
-					  int sampleR, int nChans = 0, int bSize = 0)
+	TypedUploadBuffer(std::function<void(T*, size_t)> submitFunc, std::function<void(int, int, int)> onReadyCb, int sampleR)
 	: UploadBuffer(onReadyCb, sampleR) {
-		_onReadyCb = onReadyCb;
 		_submitFunc = submitFunc;
-		_collectedFrames = getFirstPcmIndex();
-		
-		sampleRate = sampleR;
-		nChannels = nChans;
-		batchSize = bSize;
-		
-		setBufferLength();
-	}
-	
-	~TypedUploadBuffer() {
-		if (_buffer != NULL) delete _buffer;
 	}
 	
 	int bitDepth() {
 		return sizeof(T) * 8;
-	}
-	
-	int dTypeSize() {
-		return sizeof(T);
 	}
 	
 	/**
@@ -97,44 +113,22 @@ public:
 			_onReadyCb(sampleRate, nChannels, bitDepth());
 		}
 		
-		if (batchSize == 0) {
-			batchSize = nFrames;
-			setBufferLength();
+		int bufferPos = getBodyIndex();
+		int typeMult = dTypeMultiplier();
+		for (int s = 0; s < nFrames; s++) {
+			for (int c = 0; c < nChans; c++) {
+				_buffer[bufferPos] = inputs[c][s] * typeMult;
+				bufferPos++;
+			}
 		}
 		
-		if (bufferLength == 0) {
-			return;
-		}
-	
-		int typeMult = dTypeMultiplier();
-		if (nFrames < batchSize) {
-			// when looping in different DAWs:
-			// ableton: shrink nFrames, process as usual
-			// logic: drop if nFrames < batch size.
-			// easy to just drop and doesnt affect UX
-		} else {
-			// Fill the buffer
-			for (int s = 0; s < nFrames; s++) {
-				for (int c = 0; c < nChans; c++) {
-					_buffer[_collectedFrames] = inputs[c][s] * typeMult;
-					_collectedFrames++;
-				}
-			}
-			
-			// Upload once buffer is full
-			if (_collectedFrames == bufferLength) {
-				double d = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
-				double* dptr = (double*) &_buffer[0];
-				*dptr = d;
-				
-				
-				
-//				PLOG_INFO << ((double) _buffer[0]);
-				
-//				PLOG_INFO << d2;
-				_submitFunc(_buffer, getBufferSize());
-				_collectedFrames = getFirstPcmIndex();
-			}
-		}
+		// place the current time in MS at index 0
+		double timeMs = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
+		double* timestampPtr = (double*) &_buffer[0];
+		double* dtypePtr = (double*) &_buffer[getDTypeIndex()];
+		*timestampPtr = timeMs;
+		*dtypePtr = getDTypeBufferVal();
+
+		_submitFunc(_buffer, nFrames * nChans * sizeof(T) + getHeaderSize());
 	}
 };

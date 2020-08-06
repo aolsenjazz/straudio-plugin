@@ -4,20 +4,12 @@ class UploadBuffer {
 	
 protected:
 	
-	int _collectedFrames; // _collected frames == total number samples buffered
-	
 	std::function<void(int, int, int)> _onReadyCb;
 	
 public:
 
 	int sampleRate = 0;
 	int nChannels = 0;
-	int batchSize = 0;
-	
-	/**
-	 Computed
-	 */
-	int bufferLength = 0;
 	
 	/**
 	 nChannels and batchSize probably aren't known when this object is constructed, so these will probably be set in a later processBlock()

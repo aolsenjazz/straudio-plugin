@@ -13,12 +13,16 @@
 
 using namespace std::placeholders;
 
-UploadBuffer* buf;
-
 Straudio::Straudio(const iplug::InstanceInfo& info)
 : iplug::Plugin(info, iplug::MakeConfig(kNumParams, kNumPrograms)) {
 	GetParam(kMonitor)->InitBool("Monitor", false);
 	GetParam(kBitDepth)->InitEnum("Bit Depth", 0, 2, "", iplug::IParam::kFlagsNone, "", "16 bit", "32 bit");
+	
+	auto boundSigStateChange = std::bind(&Straudio::signalStateChange, this);
+	auto boundRoomStateChange = std::bind(&Straudio::roomStateChange, this);
+	auto boundOnError = std::bind(&Straudio::onError, this, _1, _2);
+	wsm = std::make_unique<WebServicesManager>(room, signalState, boundSigStateChange,
+											   boundRoomStateChange, boundOnError);
 	
 	auto boundSend = std::bind(&Straudio::sendData<short>, this, _1, _2);
 	auto boundUpdateAudio = std::bind(&Straudio::onBufferReady, this, _1, _2, _3);
@@ -47,31 +51,26 @@ Straudio::Straudio(const iplug::InstanceInfo& info)
 	  };
 }
 
-void Straudio::OnUIOpen() {}
-void Straudio::OnUIClose() {}
+void Straudio::OnUIOpen() {
+	PLOG_DEBUG << "OnUiOpen";
+}
+void Straudio::OnUIClose() {
+	PLOG_DEBUG << "OnUiClose";
+}
 
 void Straudio::OnActivate(bool active) {
-	PLOG_INFO << "OnActivate() -> active = " << active;
-	
-	if (active) {
-		auto boundUpdateAudio = std::bind(&Straudio::onBufferReady, this, _1, _2, _3);
-		int sr = GetSampleRate();
-		int bd = 16 * GetParam(kBitDepth)->Int() + 16;
-		
-		if (bd == 16) {
-			auto boundSend = std::bind(&Straudio::sendData<short>, this, _1, _2);
-			uploadBuffer.reset(new TypedUploadBuffer<short>(boundSend, boundUpdateAudio, sr));
-		} else {
-			auto boundSend = std::bind(&Straudio::sendData<float>, this, _1, _2);
-			uploadBuffer.reset(new TypedUploadBuffer<float>(boundSend, boundUpdateAudio, sr));
-		}
+	PLOG_DEBUG << "OnActivate() -> active = " << active;
+
+	if (active && GetSampleRate() != uploadBuffer->sampleRate) {
+		uploadBuffer->sampleRate = GetSampleRate();
+		wsm->updateAudioSettings(uploadBuffer->sampleRate, uploadBuffer->nChannels, uploadBuffer->bitDepth());
 	}
 }
 
 void Straudio::OnReset() {
-	PLOG_INFO << "OnReset()";
-	
-	if (wsm != nullptr) wsm->notifyBufferReset();
+	PLOG_DEBUG << "OnReset()";
+
+	wsm->notifyBufferReset();
 }
 
 void Straudio::onError(std::string severity, std::string message) {
@@ -81,35 +80,27 @@ void Straudio::onError(std::string severity, std::string message) {
 void Straudio::OnParamChange(int paramIdx) {
 	switch(paramIdx) {
 		case kBitDepth: {
-			// this is called during app construction w/o initialized uploadBuffer. ignore if not yet init'd
-			if (uploadBuffer == nullptr) return;
-			
 			auto boundUpdateAudio = std::bind(&Straudio::onBufferReady, this, _1, _2, _3);
 			int sr = uploadBuffer->sampleRate;
-			int nc = uploadBuffer->nChannels;
-			int bs = uploadBuffer->batchSize;
 			int bd = 16 * GetParam(kBitDepth)->Int() + 16;
-			
+
 			if (bd == 16) {
 				auto boundSend = std::bind(&Straudio::sendData<short>, this, _1, _2);
-				uploadBuffer.reset(new TypedUploadBuffer<short>(boundSend, boundUpdateAudio, sr, nc, bs));
+				uploadBuffer.reset(new TypedUploadBuffer<short>(boundSend, boundUpdateAudio, sr));
 			} else {
 				auto boundSend = std::bind(&Straudio::sendData<float>, this, _1, _2);
-				uploadBuffer.reset(new TypedUploadBuffer<float>(boundSend, boundUpdateAudio, sr, nc, bs));
+				uploadBuffer.reset(new TypedUploadBuffer<float>(boundSend, boundUpdateAudio, sr));
 			}
-			
-			if (wsm != nullptr) wsm->updateAudioSettings(sr, nc, bd);
-			
 			break;
 		}
 	}
 }
 
 void Straudio::signalStateChange() {
-	PLOG_INFO << "Connection state change. State: " << *signalState;
-	
+	PLOG_DEBUG << "Connection state change. State: " << *signalState;
+
 	if (*signalState == "open") {
-		
+		wsm->ss->createRoom(uploadBuffer->sampleRate, uploadBuffer->nChannels, uploadBuffer->bitDepth());
 	} else {
 		wsm->closePeerConnections(); // something happened with the connection. close peer connections
 		setRoomStatusMessage("Disconnected...");
@@ -117,23 +108,23 @@ void Straudio::signalStateChange() {
 }
 
 void Straudio::roomStateChange() {
-	PLOG_INFO << "Room state change. State:" << room->toString();
-	
+	PLOG_DEBUG << "Room state change. State:" << room->toString();
+
 	std::string msg = "Creating room...";
 	if (room->state == "open") {
 		std::ostringstream os;
 		os << "Room ID: " << room->rId;
 		msg = os.str();
 	}
-	
+
 	setRoomStatusMessage(msg);
 }
 
 void Straudio::onBufferReady(int sampleRate, int nChans, int bitDepth) {
 	if (room->state == "open" && *signalState == "open") {
 		PLOG_INFO << "Audio details changed. Updating server info...";
-		
-		if (wsm != nullptr) wsm->updateAudioSettings(sampleRate, nChans, bitDepth);
+
+		wsm->updateAudioSettings(sampleRate, nChans, bitDepth);
 	} else {
 		PLOG_DEBUG << "Tried to send audio details while room || signal != open. Ignoring...";
 	}
@@ -141,23 +132,21 @@ void Straudio::onBufferReady(int sampleRate, int nChans, int bitDepth) {
 
 void Straudio::ProcessBlock(iplug::sample** inputs, iplug::sample** outputs, int nFrames) {
     const int nChans = NOutChansConnected();
-	
+
 	if (GetParam(kMonitor)->Bool()) AudioPropagator::propagateAudio(inputs, outputs, nFrames, nChans);
 	else AudioPropagator::propagateSilence(outputs, nFrames, nChans);
-	
+
 	uploadBuffer->processBlock(inputs, nFrames, nChans);
 }
 
 template <typename T>
 void Straudio::sendData(T* data, size_t size) {
-	if (wsm != nullptr) {
-		wsm->sendData(data, size);
-	}
+	wsm->sendData(data, size);
 }
 
 void Straudio::setRoomStatusMessage(std::string msg) {
 	roomMsg.reset(new std::string(msg));
-	
+
 	if (GetUI()) {
 		// refactor this nonsense (carefully, when you have the time)
 		char const *formatted = roomMsg->c_str();
@@ -166,18 +155,9 @@ void Straudio::setRoomStatusMessage(std::string msg) {
 }
 
 void Straudio::createRoom() {
-	if (wsm == nullptr) {
-		auto boundSigStateChange = std::bind(&Straudio::signalStateChange, this);
-		auto boundRoomStateChange = std::bind(&Straudio::roomStateChange, this);
-		auto boundOnError = std::bind(&Straudio::onError, this, _1, _2);
-		wsm = std::make_unique<WebServicesManager>(room, signalState, boundSigStateChange,
-												   boundRoomStateChange, boundOnError);
-		wsm->connectToSignalling();
-		
-		while (!wsm->ss->isOpen()) {}
-		
+	if (wsm->ss->isOpen()) {
 		wsm->ss->createRoom(uploadBuffer->sampleRate, uploadBuffer->nChannels, uploadBuffer->bitDepth());
 	} else {
-		wsm->ss->createRoom(uploadBuffer->sampleRate, uploadBuffer->nChannels, uploadBuffer->bitDepth());
+		wsm->connectToSignalling();
 	}
 }

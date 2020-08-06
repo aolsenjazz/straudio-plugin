@@ -608,7 +608,6 @@
 		AF61A28C24C203BC00559F91 /* http_client.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = http_client.h; path = ../http_client.h; sourceTree = "<group>"; };
 		AF61A28D24C203BC00559F91 /* preferences.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = preferences.h; path = ../preferences.h; sourceTree = "<group>"; };
 		AF62A80A24D5B06800EA918A /* typed_upload_buffer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = typed_upload_buffer.h; path = ../typed_upload_buffer.h; sourceTree = "<group>"; };
-		AF64147D24D7689E0049EC54 /* timestamped_upload_buffer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = timestamped_upload_buffer.h; path = ../timestamped_upload_buffer.h; sourceTree = "<group>"; };
 		AF8004F024BD035C00F0EA25 /* audio_propagator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = audio_propagator.h; path = ../audio_propagator.h; sourceTree = "<group>"; };
 		AFAFB68D24BA2CEA00CEE29E /* Straudio.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Straudio.h; path = ../Straudio.h; sourceTree = "<group>"; };
 		AFAFB68E24BA2CEA00CEE29E /* Straudio.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Straudio.cpp; path = ../Straudio.cpp; sourceTree = "<group>"; };
@@ -14981,7 +14980,6 @@
 				AF61A28D24C203BC00559F91 /* preferences.h */,
 				AFAFB68F24BA2CEA00CEE29E /* signal_service.h */,
 				AFCFF65F24BCA59B006C8F07 /* timeout_executor.h */,
-				AF64147D24D7689E0049EC54 /* timestamped_upload_buffer.h */,
 				AF62A80A24D5B06800EA918A /* typed_upload_buffer.h */,
 				AF60FC3524D4708C003483D5 /* upload_buffer.h */,
 				AFAFB69024BA2CEA00CEE29E /* web_services_manager.h */,
