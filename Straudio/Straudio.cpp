@@ -18,6 +18,7 @@ Straudio::Straudio(const iplug::InstanceInfo& info)
 	GetParam(kMonitor)->InitBool("Monitor", false);
 	GetParam(kBitDepth)->InitEnum("Bit Depth", 0, 2, "", iplug::IParam::kFlagsNone, "", "16 bit", "32 bit");
 	
+	
 	auto boundSigStateChange = std::bind(&Straudio::signalStateChange, this);
 	auto boundRoomStateChange = std::bind(&Straudio::roomStateChange, this);
 	auto boundOnError = std::bind(&Straudio::onError, this, _1, _2);

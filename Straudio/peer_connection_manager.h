@@ -12,6 +12,7 @@ private:
 	std::unordered_map<std::string, std::shared_ptr<rtc::DataChannel>> _dataChannels;
 	
 	rtc::Configuration _config;
+	std::mutex lock;
 	
 	void _onPCStateChange(rtc::PeerConnection::State state) { /** noop */ }
 	void _onPCGatheringStateChange(rtc::PeerConnection::GatheringState state) { /** noop */ }
@@ -84,16 +85,19 @@ public:
 	
 	template <typename T>
 	void sendAudio(T* data, size_t size) {
+		lock.lock();
 		for (const auto & [targetId, dc] : _dataChannels) {
-			if (dc->isOpen()) {
+			if (dc != nullptr && dc->isOpen()) {
 				dc->send((rtc::byte*) data, size);
 			} else {
 				PLOG_WARNING << "Tried to send audio to nonexistent Client[" << targetId << "]";
 			}
 		}
+		lock.unlock();
 	}
 	
 	void close(std::string clientId) {
+		lock.lock();
 		if (auto it = _dataChannels.find(clientId); it != _dataChannels.end()) {
 			std::shared_ptr<rtc::DataChannel> dc = it->second;
 			dc->close();
@@ -109,6 +113,7 @@ public:
 			
 			PLOG_INFO << "Client[" << clientId << "] PeerConnection closed";
 		}
+		lock.unlock();
 	}
 	
 	void reset() {
