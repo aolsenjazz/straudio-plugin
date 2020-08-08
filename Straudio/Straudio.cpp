@@ -18,7 +18,7 @@ Straudio::Straudio(const iplug::InstanceInfo& info)
 	ix::initNetSystem();
 
 	GetParam(kMonitor)->InitBool("Monitor", false);
-	GetParam(kBitDepth)->InitEnum("Bit Depth", 1, 2, "", iplug::IParam::kFlagsNone, "", "16 bit", "32 bit");
+	GetParam(kBitDepth)->InitEnum("Bit Depth", 0, 2, "", iplug::IParam::kFlagsNone, "", "16 bit", "32 bit");
 	
 	
 	auto boundSigStateChange = std::bind(&Straudio::signalStateChange, this);
@@ -27,9 +27,9 @@ Straudio::Straudio(const iplug::InstanceInfo& info)
 	wsm = std::make_unique<WebServicesManager>(room, signalState, boundSigStateChange,
 											   boundRoomStateChange, boundOnError);
 	
-	auto boundSend = std::bind(&Straudio::sendData<float>, this, _1, _2);
+	auto boundSend = std::bind(&Straudio::sendData<short>, this, _1, _2);
 	auto boundUpdateAudio = std::bind(&Straudio::onBufferReady, this, _1, _2, _3);
-	uploadBuffer = std::make_unique<TypedUploadBuffer<float>>(boundSend, boundUpdateAudio, GetSampleRate());
+	uploadBuffer = std::make_unique<TypedUploadBuffer<short>>(boundSend, boundUpdateAudio, GetSampleRate());
 	
 	mMakeGraphicsFunc = [&]() {
 		return MakeGraphics(*this, PLUG_WIDTH, PLUG_HEIGHT, PLUG_FPS, GetScaleForScreen(PLUG_HEIGHT));
@@ -71,6 +71,11 @@ void Straudio::OnReset() {
 	PLOG_DEBUG << "OnReset()";
 
 	wsm->notifyBufferReset();
+	
+	if (GetSampleRate() != uploadBuffer->sampleRate) {
+		uploadBuffer->sampleRate = GetSampleRate();
+		wsm->updateAudioSettings(uploadBuffer->sampleRate, uploadBuffer->nChannels, uploadBuffer->bitDepth());
+	}
 }
 
 void Straudio::onError(std::string severity, std::string message) {
@@ -78,22 +83,22 @@ void Straudio::onError(std::string severity, std::string message) {
 }
 
 void Straudio::OnParamChange(int paramIdx) {
-	switch(paramIdx) {
-		case kBitDepth: {
-			auto boundUpdateAudio = std::bind(&Straudio::onBufferReady, this, _1, _2, _3);
-			int sr = uploadBuffer->sampleRate;
-			int bd = 16 * GetParam(kBitDepth)->Int() + 16;
-
-			if (bd == 16) {
-				auto boundSend = std::bind(&Straudio::sendData<short>, this, _1, _2);
-				uploadBuffer.reset(new TypedUploadBuffer<short>(boundSend, boundUpdateAudio, sr));
-			} else {
-				auto boundSend = std::bind(&Straudio::sendData<float>, this, _1, _2);
-				uploadBuffer.reset(new TypedUploadBuffer<float>(boundSend, boundUpdateAudio, sr));
-			}
-			break;
-		}
-	}
+//	switch(paramIdx) {
+//		case kBitDepth: {
+//			auto boundUpdateAudio = std::bind(&Straudio::onBufferReady, this, _1, _2, _3);
+//			int sr = uploadBuffer->sampleRate;
+//			int bd = 16 * GetParam(kBitDepth)->Int() + 16;
+//
+//			if (bd == 16) {
+//				auto boundSend = std::bind(&Straudio::sendData<short>, this, _1, _2);
+//				uploadBuffer.reset(new TypedUploadBuffer<short>(boundSend, boundUpdateAudio, sr));
+//			} else {
+//				auto boundSend = std::bind(&Straudio::sendData<float>, this, _1, _2);
+//				uploadBuffer.reset(new TypedUploadBuffer<float>(boundSend, boundUpdateAudio, sr));
+//			}
+//			break;
+//		}
+//	}
 }
 
 void Straudio::signalStateChange() {
