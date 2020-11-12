@@ -7,16 +7,14 @@ class Participant {
 public:
 	
 	std::string pId;
-	std::string displayName;
 	
 	Participant(nlohmann::json j) {
 		pId = j["id"].get<std::string>();
-		displayName = j["displayName"].get<std::string>();
 	}
 	
 	std::string toString() {
 		std::ostringstream os;
-		os << "Participant:\n\tId: " << pId << "\n\tDisplay Name: " << displayName << "std::endl";
+		os << "Participant:\n\tId: " << pId << std::endl;
 		return os.str();
 	}
 };
@@ -26,16 +24,14 @@ class Host {
 public:
 	
 	std::string hId;
-	std::string displayName;
 	
 	Host(nlohmann::json j) {
 		hId = j["id"].get<std::string>();
-		displayName = j["displayName"].get<std::string>();
 	}
 	
 	std::string toString() {
 		std::ostringstream os;
-		os << "Host:\n\tId: " << hId << "\n\tDisplay Name: " << displayName << std::endl;
+		os << "Host:\n\tId: " << hId << std::endl;
 		return os.str();
 	}
 };

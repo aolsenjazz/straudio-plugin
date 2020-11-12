@@ -16,6 +16,7 @@
 
 #include "upload_buffer.h"
 #include <chrono>
+#include <algorithm>
 
 using namespace std::chrono;
 
@@ -117,7 +118,7 @@ public:
 		int typeMult = dTypeMultiplier();
 		for (int s = 0; s < nFrames; s++) {
 			for (int c = 0; c < nChans; c++) {
-				_buffer[bufferPos] = inputs[c][s] * typeMult;
+				_buffer[bufferPos] = (inputs[c][s] > 1) ? typeMult : inputs[c][s] * typeMult;
 				bufferPos++;
 			}
 		}
