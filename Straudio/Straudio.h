@@ -10,7 +10,6 @@ int kNumPrograms = 0;
 
 enum EParams {
     kMonitor = 0,
-	kBitDepth = 1,
     kNumParams
 };
 
@@ -22,6 +21,7 @@ public:
 	void OnReset() override;
 	void OnUIOpen() override;
 	void OnUIClose() override;
+	void OnIdle() override;
 	void OnActivate(bool active) override;
 	void OnParamChange(int paramIdx) override;
 	

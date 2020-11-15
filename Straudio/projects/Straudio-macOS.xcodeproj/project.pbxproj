@@ -181,6 +181,10 @@
 		AF8531FC24BA307000EC7952 /* Straudio.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AFAFB68E24BA2CEA00CEE29E /* Straudio.cpp */; };
 		AF8531FD24BA307300EC7952 /* Straudio.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AFAFB68E24BA2CEA00CEE29E /* Straudio.cpp */; };
 		AF8531FE24BA307600EC7952 /* Straudio.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AFAFB68E24BA2CEA00CEE29E /* Straudio.cpp */; };
+		AF85BDF52560386300CF654B /* libsamplerate.a in Frameworks */ = {isa = PBXBuildFile; fileRef = AF85BDEA2560386300CF654B /* libsamplerate.a */; };
+		AF85BDF62560386300CF654B /* libsamplerate.a in Frameworks */ = {isa = PBXBuildFile; fileRef = AF85BDEA2560386300CF654B /* libsamplerate.a */; };
+		AF85BDF72560386300CF654B /* libsamplerate.a in Frameworks */ = {isa = PBXBuildFile; fileRef = AF85BDEA2560386300CF654B /* libsamplerate.a */; };
+		AF85BDF82560386300CF654B /* libsamplerate.a in Frameworks */ = {isa = PBXBuildFile; fileRef = AF85BDEA2560386300CF654B /* libsamplerate.a */; };
 		AFAA48EF24DC8D040027052B /* libixwebsocket.a in Frameworks */ = {isa = PBXBuildFile; fileRef = AFAA48EE24DC8CFF0027052B /* libixwebsocket.a */; };
 		AFAA48F724DCA2E20027052B /* libixwebsocket.a in Frameworks */ = {isa = PBXBuildFile; fileRef = AFAA48F624DCA2DE0027052B /* libixwebsocket.a */; };
 		AFAA48F824DCA2E60027052B /* libixwebsocket.a in Frameworks */ = {isa = PBXBuildFile; fileRef = AFAA48F624DCA2DE0027052B /* libixwebsocket.a */; };
@@ -243,6 +247,27 @@
 			proxyType = 2;
 			remoteGlobalIDString = AF2D7D1D251C2EE800FAC5B4;
 			remoteInfo = Application;
+		};
+		AF85BDEF2560386300CF654B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 4FF7B0F3156A831000E6CB12 /* AAXLibrary.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = AF2D7D35251C2F8800FAC5B4;
+			remoteInfo = Test;
+		};
+		AF85BDF12560386300CF654B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 4FF7B0F3156A831000E6CB12 /* AAXLibrary.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = AF2D7D49251C2F8900FAC5B4;
+			remoteInfo = TestTests;
+		};
+		AF85BDF32560386300CF654B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 4FF7B0F3156A831000E6CB12 /* AAXLibrary.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = AF2D7D54251C2F8900FAC5B4;
+			remoteInfo = TestUITests;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -661,6 +686,7 @@
 		AF61A28D24C203BC00559F91 /* preferences.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = preferences.h; path = ../preferences.h; sourceTree = "<group>"; };
 		AF62A80A24D5B06800EA918A /* typed_upload_buffer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = typed_upload_buffer.h; path = ../typed_upload_buffer.h; sourceTree = "<group>"; };
 		AF8004F024BD035C00F0EA25 /* audio_propagator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = audio_propagator.h; path = ../audio_propagator.h; sourceTree = "<group>"; };
+		AF85BDEA2560386300CF654B /* libsamplerate.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libsamplerate.a; sourceTree = "<group>"; };
 		AFAA48EE24DC8CFF0027052B /* libixwebsocket.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libixwebsocket.a; path = ../../../IXWebSocket/build/libixwebsocket.a; sourceTree = "<group>"; };
 		AFAA48F024DC8D8F0027052B /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 		AFAA48F524DC95930027052B /* ix_signal_service.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ix_signal_service.h; path = ../ix_signal_service.h; sourceTree = "<group>"; };
@@ -14962,6 +14988,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				AF8531EA24BA303500EC7952 /* libcrypto.a in Frameworks */,
+				AF85BDF62560386300CF654B /* libsamplerate.a in Frameworks */,
 				AF8531EB24BA303500EC7952 /* libdatachannel-static.a in Frameworks */,
 				AF8531EC24BA303500EC7952 /* libjuice-static.a in Frameworks */,
 				AFAA48F724DCA2E20027052B /* libixwebsocket.a in Frameworks */,
@@ -14983,6 +15010,7 @@
 				AF8531FA24BA303F00EC7952 /* libssl.a in Frameworks */,
 				AF8531FB24BA303F00EC7952 /* libusrsctp.a in Frameworks */,
 				AFAA48F924DCA2EA0027052B /* libixwebsocket.a in Frameworks */,
+				AF85BDF82560386300CF654B /* libsamplerate.a in Frameworks */,
 				AFAA48FD24DCA33B0027052B /* Security.framework in Frameworks */,
 				4F815999205D525A00393585 /* libAAXLibrary_libcpp.a in Frameworks */,
 			);
@@ -14993,6 +15021,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				AF8531F024BA303800EC7952 /* libcrypto.a in Frameworks */,
+				AF85BDF72560386300CF654B /* libsamplerate.a in Frameworks */,
 				AF8531F124BA303800EC7952 /* libdatachannel-static.a in Frameworks */,
 				AF8531F224BA303800EC7952 /* libjuice-static.a in Frameworks */,
 				AFAA48F824DCA2E60027052B /* libixwebsocket.a in Frameworks */,
@@ -15008,6 +15037,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				AF2D7D10251C2DFC00FAC5B4 /* Security.framework in Frameworks */,
+				AF85BDF52560386300CF654B /* libsamplerate.a in Frameworks */,
 				AF8531E424BA302800EC7952 /* libcrypto.a in Frameworks */,
 				AF8531E624BA302800EC7952 /* libjuice-static.a in Frameworks */,
 				AF8531E724BA302800EC7952 /* libnettle.a in Frameworks */,
@@ -15468,6 +15498,9 @@
 			children = (
 				4F8157D9205D4FEE00393585 /* libAAXLibrary_libcpp.a */,
 				AF2D7D27251C2EF600FAC5B4 /* Application.bundle */,
+				AF85BDF02560386300CF654B /* Test.app */,
+				AF85BDF22560386300CF654B /* TestTests.xctest */,
+				AF85BDF42560386300CF654B /* TestUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -15832,6 +15865,7 @@
 		AFAFB69D24BA2D2100CEE29E /* lib */ = {
 			isa = PBXGroup;
 			children = (
+				AF85BDEA2560386300CF654B /* libsamplerate.a */,
 				AFAFB69E24BA2D2100CEE29E /* libcrypto.a */,
 				AFAFB69F24BA2D2100CEE29E /* libdatachannel-static.a */,
 				AFAFB6A024BA2D2100CEE29E /* libnettle.a */,
@@ -39840,6 +39874,27 @@
 			fileType = wrapper.cfbundle;
 			path = Application.bundle;
 			remoteRef = AF2D7D26251C2EF600FAC5B4 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		AF85BDF02560386300CF654B /* Test.app */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.application;
+			path = Test.app;
+			remoteRef = AF85BDEF2560386300CF654B /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		AF85BDF22560386300CF654B /* TestTests.xctest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = TestTests.xctest;
+			remoteRef = AF85BDF12560386300CF654B /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		AF85BDF42560386300CF654B /* TestUITests.xctest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = TestUITests.xctest;
+			remoteRef = AF85BDF32560386300CF654B /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */

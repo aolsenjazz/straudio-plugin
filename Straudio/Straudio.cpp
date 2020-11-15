@@ -18,7 +18,6 @@ Straudio::Straudio(const iplug::InstanceInfo& info)
 	ix::initNetSystem();
 
 	GetParam(kMonitor)->InitBool("Monitor", false);
-	GetParam(kBitDepth)->InitEnum("Bit Depth", 0, 2, "", iplug::IParam::kFlagsNone, "", "16 bit", "32 bit");
 	
 	
 	auto boundSigStateChange = std::bind(&Straudio::signalStateChange, this);
@@ -45,8 +44,6 @@ Straudio::Straudio(const iplug::InstanceInfo& info)
 		
 		pGraphics->AttachControl(new iplug::igraphics::ITextControl(root.GetMidVPadded(50), roomMsg->c_str(), iplug::igraphics::IText(50)), 69);
 		
-		pGraphics->AttachControl(new iplug::igraphics::ICaptionControl(bitDepthRect, kBitDepth, iplug::igraphics::IText(24.f), iplug::igraphics::DEFAULT_FGCOLOR, false), 80085, "misccontrols");
-		
 		pGraphics->AttachControl(new iplug::igraphics::IVToggleControl(monitorCtrlRect, kMonitor, "Monitor", iplug::igraphics::DEFAULT_STYLE, "Off", "On"));
 	  };
 }
@@ -58,12 +55,16 @@ void Straudio::OnUIClose() {
 	PLOG_DEBUG << "OnUiClose";
 }
 
+void Straudio::OnIdle() {
+//	uploadBuffer->submit();
+}
+
 void Straudio::OnActivate(bool active) {
 	PLOG_DEBUG << "OnActivate() -> active = " << active;
 
-	if (active && GetSampleRate() != uploadBuffer->sampleRate) {
-		uploadBuffer->sampleRate = GetSampleRate();
-		wsm->updateAudioSettings(uploadBuffer->sampleRate, uploadBuffer->nChannels, uploadBuffer->bitDepth());
+	if (active && GetSampleRate() != uploadBuffer->inputSampleRate) {
+		uploadBuffer->inputSampleRate = GetSampleRate();
+		uploadBuffer->notifySettingsChange();
 	}
 }
 
@@ -72,9 +73,9 @@ void Straudio::OnReset() {
 
 	wsm->notifyBufferReset();
 	
-	if (GetSampleRate() != uploadBuffer->sampleRate) {
-		uploadBuffer->sampleRate = GetSampleRate();
-		wsm->updateAudioSettings(uploadBuffer->sampleRate, uploadBuffer->nChannels, uploadBuffer->bitDepth());
+	if (GetSampleRate() != uploadBuffer->inputSampleRate) {
+		uploadBuffer->inputSampleRate = GetSampleRate();
+		uploadBuffer->notifySettingsChange();
 	}
 }
 
@@ -83,29 +84,16 @@ void Straudio::onError(std::string severity, std::string message) {
 }
 
 void Straudio::OnParamChange(int paramIdx) {
-//	switch(paramIdx) {
-//		case kBitDepth: {
-//			auto boundUpdateAudio = std::bind(&Straudio::onBufferReady, this, _1, _2, _3);
-//			int sr = uploadBuffer->sampleRate;
-//			int bd = 16 * GetParam(kBitDepth)->Int() + 16;
-//
-//			if (bd == 16) {
-//				auto boundSend = std::bind(&Straudio::sendData<short>, this, _1, _2);
-//				uploadBuffer.reset(new TypedUploadBuffer<short>(boundSend, boundUpdateAudio, sr));
-//			} else {
-//				auto boundSend = std::bind(&Straudio::sendData<float>, this, _1, _2);
-//				uploadBuffer.reset(new TypedUploadBuffer<float>(boundSend, boundUpdateAudio, sr));
-//			}
-//			break;
-//		}
-//	}
+	switch(paramIdx) {
+		
+	}
 }
 
 void Straudio::signalStateChange() {
 	PLOG_DEBUG << "Connection state change. State: " << *signalState;
 
 	if (*signalState == "open") {
-		wsm->ss->createRoom(uploadBuffer->sampleRate, uploadBuffer->nChannels, uploadBuffer->bitDepth());
+		wsm->ss->createRoom(uploadBuffer->outputSampleRate, uploadBuffer->nChannels, uploadBuffer->bitDepth());
 	} else {
 		wsm->closePeerConnections(); // something happened with the connection. close peer connections
 		setRoomStatusMessage("Disconnected...");
@@ -128,7 +116,6 @@ void Straudio::roomStateChange() {
 void Straudio::onBufferReady(int sampleRate, int nChans, int bitDepth) {
 	if (room->state == "open" && *signalState == "open") {
 		PLOG_INFO << "Audio details changed. Updating server info...";
-
 		wsm->updateAudioSettings(sampleRate, nChans, bitDepth);
 	} else {
 		PLOG_DEBUG << "Tried to send audio details while room || signal != open. Ignoring...";

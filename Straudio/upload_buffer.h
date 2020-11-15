@@ -1,15 +1,21 @@
 #pragma once
 
+#include "libsamplerate/src_config.h"
+#include "libsamplerate/samplerate.h"
+
 class UploadBuffer {
 	
 protected:
 	
 	std::function<void(int, int, int)> _onReadyCb;
+	SRC_STATE* src;
 	
 public:
 
-	int sampleRate = 0;
+	int inputSampleRate = 0;
+	int outputSampleRate = 44100;
 	int nChannels = 0;
+	bool updateRequired = false;
 	
 	/**
 	 nChannels and batchSize probably aren't known when this object is constructed, so these will probably be set in a later processBlock()
@@ -17,10 +23,16 @@ public:
 	 */
 	UploadBuffer(std::function<void(int, int, int)> onReadyCb, int sampleR) {
 		_onReadyCb = onReadyCb;
-		sampleRate = sampleR;
+		inputSampleRate = sampleR;
 	}
 	
-	virtual ~UploadBuffer() {}
+	void notifySettingsChange() {
+		updateRequired = true;
+	}
+	
+	virtual ~UploadBuffer() {
+		src_delete(src);
+	}
 	
 	virtual void processBlock(iplug::sample** inputs, int nFrames, int nChans) = 0;
 	virtual int bitDepth() = 0;
