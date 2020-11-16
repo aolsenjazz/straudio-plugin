@@ -118,20 +118,21 @@ private:
 		if (inputSampleRate != outputSampleRate) {
 			// cleanup old sample rate converter
 			src_delete(src);
-			
+
 			// initialize a new sample rate converter
 			int* error = new int;
-			src = src_new(SRC_SINC_BEST_QUALITY, nChans, error);
+			src = src_new(SRC_LINEAR, nChans, error);
+//			src = src_new(SRC_SINC_BEST_QUALITY, nChans, error);
 			if (*error != 0) {
 				doResample = false;
 				outputSampleRate = inputSampleRate;
 				return;
 			}
-			
+
 			// update src data object
 			srcData.src_ratio = outputSampleRate / (double) inputSampleRate;
 			doResample = true;
-			
+
 			// clean up
 			delete error;
 		} else {
@@ -204,7 +205,7 @@ public:
 			for (int j = 0; j < srcData.output_frames_gen * nChans; j++) {
 				_uploadBuffer[j + bodyIndex] = (_resampleOut[j] > 1) ? typeMult : _resampleOut[j] * typeMult;
 			}
-			
+
 			dataToTransmit = srcData.output_frames_gen * nChans * sizeof(T) + getHeaderSize();
 		} else {
 			// just copy input to the upload buffer

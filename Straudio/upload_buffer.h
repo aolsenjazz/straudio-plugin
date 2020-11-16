@@ -13,7 +13,7 @@ protected:
 public:
 
 	int inputSampleRate = 0;
-	int outputSampleRate = 44100;
+	int outputSampleRate = 40000;
 	int nChannels = 0;
 	bool updateRequired = false;
 	
