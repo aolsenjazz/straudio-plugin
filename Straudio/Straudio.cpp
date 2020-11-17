@@ -9,7 +9,7 @@
 #include "ui/AudioInfoPanel.h"
 #include "web_services_manager.h"
 #include "audio_propagator.h"
-#include "typed_upload_buffer.h"
+#include "idle_upload_buffer.h"
 
 using namespace std::placeholders;
 
@@ -18,7 +18,6 @@ Straudio::Straudio(const iplug::InstanceInfo& info)
 	ix::initNetSystem();
 
 	GetParam(kMonitor)->InitBool("Monitor", false);
-	
 	
 	auto boundSigStateChange = std::bind(&Straudio::signalStateChange, this);
 	auto boundRoomStateChange = std::bind(&Straudio::roomStateChange, this);
@@ -56,7 +55,9 @@ void Straudio::OnUIClose() {
 }
 
 void Straudio::OnIdle() {
-//	uploadBuffer->submit();
+	if (uploadBuffer != nullptr) {
+		uploadBuffer->upload();
+	}
 }
 
 void Straudio::OnActivate(bool active) {
@@ -93,7 +94,11 @@ void Straudio::signalStateChange() {
 	PLOG_DEBUG << "Connection state change. State: " << *signalState;
 
 	if (*signalState == "open") {
-		wsm->ss->createRoom(uploadBuffer->outputSampleRate, uploadBuffer->nChannels, uploadBuffer->bitDepth());
+		if (uploadBuffer->nChannels == 0) {
+			PLOG_ERROR << "SENDING 0 CHANNELS~~~" << std::endl;
+		}
+		
+		wsm->ss->createRoom(uploadBuffer->outputSampleRate(), uploadBuffer->nChannels, uploadBuffer->bitDepth());
 	} else {
 		wsm->closePeerConnections(); // something happened with the connection. close peer connections
 		setRoomStatusMessage("Disconnected...");
@@ -116,6 +121,9 @@ void Straudio::roomStateChange() {
 void Straudio::onBufferReady(int sampleRate, int nChans, int bitDepth) {
 	if (room->state == "open" && *signalState == "open") {
 		PLOG_INFO << "Audio details changed. Updating server info...";
+		if (nChans == 0) {
+			PLOG_ERROR << "SENDING 0 CHANNELS~~~" << std::endl;
+		}
 		wsm->updateAudioSettings(sampleRate, nChans, bitDepth);
 	} else {
 		PLOG_DEBUG << "Tried to send audio details while room || signal != open. Ignoring...";

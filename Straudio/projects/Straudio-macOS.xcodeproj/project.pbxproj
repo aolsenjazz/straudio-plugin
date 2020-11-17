@@ -14971,6 +14971,7 @@
 		AFAFF38524BA2D5900CEE29E /* pcm_gen.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = pcm_gen.h; sourceTree = "<group>"; };
 		AFAFF38624BA2D5900CEE29E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		AFAFF38824BA2D5A00CEE29E /* debug_socket.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = debug_socket.h; sourceTree = "<group>"; };
+		AFBA6823256221DF00A302BB /* idle_upload_buffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = idle_upload_buffer.h; path = ../idle_upload_buffer.h; sourceTree = "<group>"; };
 		AFC5B12824C0C6B0001C301C /* StraudioTests */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = StraudioTests; sourceTree = BUILT_PRODUCTS_DIR; };
 		AFC66E2C24BA5D9700CB4200 /* peer_connection_manager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = peer_connection_manager.h; path = ../peer_connection_manager.h; sourceTree = "<group>"; };
 		AFCE02C824CF486600960647 /* platform_folders.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = platform_folders.h; sourceTree = "<group>"; };
@@ -15067,6 +15068,7 @@
 				AFAFB69224BA2CEA00CEE29E /* config.h */,
 				AFAFB69324BA2CEA00CEE29E /* domain.h */,
 				AF61A28C24C203BC00559F91 /* http_client.h */,
+				AFBA6823256221DF00A302BB /* idle_upload_buffer.h */,
 				AFCFF65E24BB7A2F006C8F07 /* interval_executor.h */,
 				AF5A7B6E24CF4D8F00A5FF45 /* logger_init.h */,
 				AFC66E2C24BA5D9700CB4200 /* peer_connection_manager.h */,
@@ -40906,7 +40908,7 @@
 					"$(EXTRA_LIB_PATHS)",
 					../lib,
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				MACOSX_DEPLOYMENT_TARGET = 10.14;
 				OTHER_LDFLAGS = (
 					"$(APP_FRAMEWORKS)",
 					"$(inherited)",
@@ -40947,7 +40949,7 @@
 					"$(EXTRA_LIB_PATHS)",
 					../lib,
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				MACOSX_DEPLOYMENT_TARGET = 10.14;
 				OTHER_LDFLAGS = (
 					"$(APP_FRAMEWORKS)",
 					"$(inherited)",
@@ -40987,7 +40989,7 @@
 					"$(EXTRA_LIB_PATHS)",
 					../lib,
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				MACOSX_DEPLOYMENT_TARGET = 10.14;
 				OTHER_LDFLAGS = (
 					"$(APP_FRAMEWORKS)",
 					"$(inherited)",

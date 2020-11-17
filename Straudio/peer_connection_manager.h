@@ -1,5 +1,6 @@
 #include "rtc/rtc.hpp"
 #include "rtc/reliability.hpp"
+#include <variant>
 
 using namespace std::placeholders;
 
@@ -24,7 +25,7 @@ private:
 		dc->onClosed([sourceId]() { std::cout << "DataChannel from " << sourceId << " closed" << std::endl; });
 
 		dc->onMessage([sourceId](const std::variant<rtc::binary, std::string> &message) {});
-
+		
 		_dataChannels.emplace(sourceId, dc);
 	}
 	

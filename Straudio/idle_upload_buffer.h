@@ -40,14 +40,24 @@ private:
 	*/
 	const double DTYPE_FLOAT32 = 1;
 	
-	int bufferPos = 0;
+	int _outputSampleRate = 40000;
 
 	SRC_DATA srcData;
 	
 	/**
 	 20000 is an arbitrary size. As long as size is > 8200, shouldn't matter much
 	 */
-	float _interleavedData[20000];
+	float activeBufferArray[200000];
+	float inactiveBufferArray[200000];
+	
+	float* activeBuffer = activeBufferArray;
+	float* inactiveBuffer = inactiveBufferArray;
+	
+	int* activeIndex = new int(0);
+	int* inactiveIndex = new int(0);
+	
+	bool swap = false;
+	
 	float _resampleOut[200000];
 	T _uploadBuffer[200000];
 	
@@ -58,7 +68,6 @@ private:
 	 */
 	bool notSilent = false;
 	int dataToTransmit = 0;
-	int interleavedPos = 0;
 	int processError = 0;
 	int bodyIndex = getBodyIndex();
 	int typeMult = dTypeMultiplier();
@@ -115,22 +124,22 @@ private:
 		nChannels = nChans;
 		
 		// if we need to resample, init src
-		if (inputSampleRate != outputSampleRate) {
+		if (inputSampleRate != outputSampleRate()) {
 			// cleanup old sample rate converter
 			src_delete(src);
 
 			// initialize a new sample rate converter
 			int* error = new int;
-			src = src_new(SRC_LINEAR, nChans, error);
-//			src = src_new(SRC_SINC_BEST_QUALITY, nChans, error);
+//			src = src_new(SRC_LINEAR, nChans, error);
+			src = src_new(SRC_SINC_BEST_QUALITY, nChans, error);
 			if (*error != 0) {
 				doResample = false;
-				outputSampleRate = inputSampleRate;
+				_outputSampleRate = inputSampleRate;
 				return;
 			}
 
 			// update src data object
-			srcData.src_ratio = outputSampleRate / (double) inputSampleRate;
+			srcData.src_ratio = outputSampleRate() / (double) inputSampleRate;
 			doResample = true;
 
 			// clean up
@@ -139,7 +148,7 @@ private:
 			doResample = false;
 		}
 		
-		_onReadyCb(outputSampleRate, nChannels, bitDepth());
+		_onReadyCb(outputSampleRate(), nChannels, bitDepth());
 	}
 	
 public:
@@ -150,7 +159,6 @@ public:
 		
 		srcData.end_of_input = 0;
 		srcData.data_out = _resampleOut;
-		srcData.data_in = _interleavedData;
 	}
 	
 	int bitDepth() {
@@ -158,7 +166,7 @@ public:
 	}
 	
 	int outputSampleRate() {
-		return 40000;
+		return _outputSampleRate;
 	}
 	
 	/**
@@ -178,64 +186,69 @@ public:
 			updateInternals(nChans);
 		}
 		
+		int *index = (swap) ? inactiveIndex : activeIndex;
+		float *buffer = (swap) ? inactiveBuffer : activeBuffer;
+		
+		// just copy input to the upload buffer
+		for (int s = 0; s < nFrames; s++) {
+			for (int c = 0; c < nChans; c++) {
+				if (inputs[c][s] != 0) {
+					notSilent = true;
+				}
+				
+				buffer[*index] = inputs[c][s] > 1 ? 1 : inputs[c][s];
+				(*index)++;
+			}
+		}
+	}
+	
+	void upload() {
+		swap = !swap;
+		
+		int *index = (swap) ? activeIndex : inactiveIndex;
+		float *buffer = (swap) ? activeBuffer : inactiveBuffer;
+		
+		if (*index == 0) return;
+		
 		// resample if necessary
 		if (doResample) {
-
-			// interleave channels if necessary
-			interleavedPos = 0;
-			for (int s = 0; s < nFrames; s++) {
-				for (int c = 0; c < nChans; c++) {
-					if (inputs[c][s] != 0) {
-						notSilent = true;
-					}
-
-					_interleavedData[interleavedPos] = inputs[c][s];
-					interleavedPos++;
-				}
-			}
-
-			srcData.input_frames = nFrames;
-			srcData.output_frames = nFrames;
+			srcData.input_frames = *index / nChannels;
+			srcData.output_frames = *index / nChannels;
+			srcData.data_in = buffer;
 
 			processError = src_process(src, &srcData);
 			if (processError != 0) {
 				PLOG_ERROR << processError << std::endl;
 
 				doResample = false; // if resampling fails, stop resampling
-				outputSampleRate = inputSampleRate;
+				_outputSampleRate = inputSampleRate;
 			}
 
 			// copy resampled data into the upload buffer
-			for (int j = 0; j < srcData.output_frames_gen * nChans; j++) {
+			for (int j = 0; j < srcData.output_frames_gen * nChannels; j++) {
 				_uploadBuffer[j + bodyIndex] = (_resampleOut[j] > 1) ? typeMult : _resampleOut[j] * typeMult;
 			}
-
-			dataToTransmit = srcData.output_frames_gen * nChans * sizeof(T) + getHeaderSize();
+			
+			dataToTransmit = srcData.output_frames_gen * nChannels * sizeof(T) + getHeaderSize();
 		} else {
-			// just copy input to the upload buffer
-			bufferPos = bodyIndex;
-			for (int s = 0; s < nFrames; s++) {
-				for (int c = 0; c < nChans; c++) {
-					if (inputs[c][s] != 0) {
-						notSilent = true;
-					}
-					
-					_uploadBuffer[bufferPos] = (inputs[c][s] > 1) ? typeMult : inputs[c][s] * typeMult;
-					bufferPos++;
-				}
+			for (int j = 0; j < *index; j++) {
+				_uploadBuffer[j + bodyIndex] = inactiveBuffer[j] * typeMult;
 			}
 			
-			dataToTransmit = nFrames * nChans * sizeof(T) + getHeaderSize();
+			dataToTransmit = *index * sizeof(T) + getHeaderSize();
 		}
+		*index = 0;
 		
 		// add headers
 		double* timestampPtr = (double*) &_uploadBuffer[0];
-		double* dtypePtr = (double*) &_uploadBuffer[getDTypeIndex()]; // this will always be DTYPE_FLOAT32
+		double* dtypePtr = (double*) &_uploadBuffer[getDTypeIndex()];
 		*timestampPtr = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
 		*dtypePtr = getDTypeBufferVal();
 		
-		if (notSilent) {
+//		if (notSilent) {
 			_submitFunc(_uploadBuffer, dataToTransmit);
-		}
+//		}
 	}
 };
+
+

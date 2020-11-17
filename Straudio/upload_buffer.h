@@ -13,7 +13,6 @@ protected:
 public:
 
 	int inputSampleRate = 0;
-	int outputSampleRate = 40000;
 	int nChannels = 0;
 	bool updateRequired = false;
 	
@@ -36,4 +35,6 @@ public:
 	
 	virtual void processBlock(iplug::sample** inputs, int nFrames, int nChans) = 0;
 	virtual int bitDepth() = 0;
+	virtual int outputSampleRate() = 0;
+	virtual void upload() = 0;
 };
