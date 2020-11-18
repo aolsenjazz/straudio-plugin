@@ -7,11 +7,11 @@
 	<key>CFBundleExecutable</key>
 	<string>Straudio</string>
 	<key>CFBundleGetInfoString</key>
-	<string>Straudio v1.0.0 Copyright 2019 Aofx Inc</string>
+	<string>Straudio v0.0.16 Copyright 2020 AOFX Inc</string>
 	<key>CFBundleIconFile</key>
 	<string>Straudio.icns</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.ao.app.Straudio</string>
+	<string>com.AOFX.app.Straudio</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
@@ -19,17 +19,17 @@
 	<key>CFBundlePackageType</key>
 	<string>BNDL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.0.0</string>
+	<string>0.0.16</string>
 	<key>CFBundleSignature</key>
 	<string>Nvem</string>
 	<key>CFBundleVersion</key>
-	<string>1.0.0</string>
+	<string>0.0.16</string>
 	<key>CSResourcesFileMapped</key>
 	<true/>
 	<key>LSApplicationCategoryType</key>
 	<string>public.app-category.music</string>
 	<key>LSMinimumSystemVersion</key>
-	<string>10.11.0</string>
+	<string>10.15.0</string>
 	<key>NSMainNibFile</key>
 	<string>Straudio-macOS-MainMenu</string>
 	<key>NSMicrophoneUsageDescription</key>

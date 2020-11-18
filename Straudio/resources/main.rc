@@ -207,8 +207,8 @@ BEGIN
             VALUE "FileDescription", "Straudio"
             VALUE "InternalName", "Straudio"
             VALUE "ProductName", "Straudio"
-            VALUE "CompanyName", "ao"
-            VALUE "LegalCopyright", "Copyright 2019 Acme Inc"
+            VALUE "CompanyName", "AOFX"
+            VALUE "LegalCopyright", "Copyright 2020 Acme Inc"
             VALUE "LegalTrademarks", "VST is a trademark of Steinberg Media Technologies GmbH, Audio Unit is a trademark of Apple, Inc."
         END
     END

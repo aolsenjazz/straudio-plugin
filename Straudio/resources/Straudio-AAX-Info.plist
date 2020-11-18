@@ -7,9 +7,9 @@
 	<key>CFBundleExecutable</key>
 	<string>Straudio</string>
 	<key>CFBundleGetInfoString</key>
-	<string>Straudio v1.0.0 Copyright 2019 Aofx Inc</string>
+	<string>Straudio v0.0.16 Copyright 2020 AOFX Inc</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.ao.aax.Straudio</string>
+	<string>com.AOFX.aax.Straudio</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
@@ -17,15 +17,15 @@
 	<key>CFBundlePackageType</key>
 	<string>TDMw</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.0.0</string>
+	<string>0.0.16</string>
 	<key>CFBundleSignature</key>
 	<string>PTul</string>
 	<key>CFBundleVersion</key>
-	<string>1.0.0</string>
+	<string>0.0.16</string>
 	<key>CSResourcesFileMapped</key>
 	<true/>
 	<key>LSMinimumSystemVersion</key>
-	<string>10.11.0</string>
+	<string>10.15.0</string>
 	<key>LSMultipleInstancesProhibited</key>
 	<string>true</string>
 	<key>LSPrefersCarbon</key>

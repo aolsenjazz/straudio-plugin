@@ -1,17 +1,16 @@
-// iPlug2 configuration. For applcation-level config, see config directory
 #define PLUG_NAME "Straudio"
-#define PLUG_MFR "AlexanderOlsen"
-#define PLUG_VERSION_HEX 0x00010000
-#define PLUG_VERSION_STR "0.2.0"
+#define PLUG_MFR "Alexander Olsen"
+#define PLUG_VERSION_HEX 0x00000010
+#define PLUG_VERSION_STR "0.1.0"
 #define PLUG_UNIQUE_ID 'Nvem'
 #define PLUG_MFR_ID 'Aofx'
-#define PLUG_URL_STR "https://www.instagram.com/alex.olsen"
+#define PLUG_URL_STR "https://straud.io"
 #define PLUG_EMAIL_STR "aolsenjazz@gmail.com"
-#define PLUG_COPYRIGHT_STR "Copyright 2019 Aofx Inc"
+#define PLUG_COPYRIGHT_STR "Copyright 2020 AOFX Inc"
 #define PLUG_CLASS_NAME Straudio
 
 #define BUNDLE_NAME "Straudio"
-#define BUNDLE_MFR "ao"
+#define BUNDLE_MFR "AOFX"
 #define BUNDLE_DOMAIN "com"
 
 #define SHARED_RESOURCES_SUBPATH "Straudio"

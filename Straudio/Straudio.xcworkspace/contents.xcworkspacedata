@@ -2,6 +2,9 @@
 <Workspace
    version = "1.0">
    <FileRef
+      location = "group:projects/Straudio-iOS.xcodeproj">
+   </FileRef>
+   <FileRef
       location = "group:projects/Straudio-macOS.xcodeproj">
    </FileRef>
 </Workspace>

@@ -36,7 +36,7 @@
 					<key>manufacturer</key>
 					<string>Acme</string>
 					<key>name</key>
-					<string>ao: Straudio</string>
+					<string>AOFX: Straudio</string>
 					<key>sandboxSafe</key>
 					<true/>
 					<key>subtype</key>

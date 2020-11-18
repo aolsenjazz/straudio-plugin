@@ -14,10 +14,10 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "4FB600121567CB0A0020189A"
-               BuildableName = "Straudio.aaxplugin"
-               BlueprintName = "AAX"
-               ReferencedContainer = "container:Straudio-macOS.xcodeproj">
+               BlueprintIdentifier = "91236D0C1B08F42B00734C5E"
+               BuildableName = "Straudio.app"
+               BlueprintName = "App"
+               ReferencedContainer = "container:Straudio-iOS.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -27,6 +27,15 @@
       selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
       shouldUseLaunchSchemeArgsEnv = "YES">
+      <MacroExpansion>
+         <BuildableReference
+            BuildableIdentifier = "primary"
+            BlueprintIdentifier = "91236D0C1B08F42B00734C5E"
+            BuildableName = "Straudio.app"
+            BlueprintName = "App"
+            ReferencedContainer = "container:Straudio-iOS.xcodeproj">
+         </BuildableReference>
+      </MacroExpansion>
       <Testables>
       </Testables>
    </TestAction>
@@ -42,20 +51,16 @@
       enableGPUFrameCaptureMode = "3"
       enableGPUValidationMode = "1"
       allowLocationSimulation = "YES">
-      <PathRunnable
-         runnableDebuggingMode = "0"
-         BundleIdentifier = "com.avid.ProTools"
-         FilePath = "/Applications/Avid/ProTools_3PDev/Pro Tools.app">
-      </PathRunnable>
-      <MacroExpansion>
+      <BuildableProductRunnable
+         runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "4FB600121567CB0A0020189A"
-            BuildableName = "Straudio.aaxplugin"
-            BlueprintName = "AAX"
-            ReferencedContainer = "container:Straudio-macOS.xcodeproj">
+            BlueprintIdentifier = "91236D0C1B08F42B00734C5E"
+            BuildableName = "Straudio.app"
+            BlueprintName = "App"
+            ReferencedContainer = "container:Straudio-iOS.xcodeproj">
          </BuildableReference>
-      </MacroExpansion>
+      </BuildableProductRunnable>
    </LaunchAction>
    <ProfileAction
       buildConfiguration = "Release"
@@ -63,10 +68,16 @@
       savedToolIdentifier = ""
       useCustomWorkingDirectory = "NO"
       debugDocumentVersioning = "YES">
-      <PathRunnable
-         runnableDebuggingMode = "0"
-         FilePath = "/Applications/Avid/ProTools_3PDev/Pro Tools.app">
-      </PathRunnable>
+      <BuildableProductRunnable
+         runnableDebuggingMode = "0">
+         <BuildableReference
+            BuildableIdentifier = "primary"
+            BlueprintIdentifier = "91236D0C1B08F42B00734C5E"
+            BuildableName = "Straudio.app"
+            BlueprintName = "App"
+            ReferencedContainer = "container:Straudio-iOS.xcodeproj">
+         </BuildableReference>
+      </BuildableProductRunnable>
    </ProfileAction>
    <AnalyzeAction
       buildConfiguration = "Debug">

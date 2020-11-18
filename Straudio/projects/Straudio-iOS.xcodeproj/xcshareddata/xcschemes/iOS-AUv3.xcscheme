@@ -15,10 +15,10 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "4F39075F2013EBA300DDA490"
-               BuildableName = "Straudio.appex"
+               BlueprintIdentifier = "91236D761B08F59300734C5E"
+               BuildableName = "StraudioAppExtension.appex"
                BlueprintName = "AUv3"
-               ReferencedContainer = "container:Straudio-macOS.xcodeproj">
+               ReferencedContainer = "container:Straudio-iOS.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
          <BuildActionEntry
@@ -29,10 +29,10 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "4F3EE1BA231438D000004786"
+               BlueprintIdentifier = "91236D0C1B08F42B00734C5E"
                BuildableName = "Straudio.app"
-               BlueprintName = "AUv3App"
-               ReferencedContainer = "container:Straudio-macOS.xcodeproj">
+               BlueprintName = "App"
+               ReferencedContainer = "container:Straudio-iOS.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -42,38 +42,44 @@
       selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
       shouldUseLaunchSchemeArgsEnv = "YES">
+      <MacroExpansion>
+         <BuildableReference
+            BuildableIdentifier = "primary"
+            BlueprintIdentifier = "91236D761B08F59300734C5E"
+            BuildableName = "StraudioAppExtension.appex"
+            BlueprintName = "AUv3"
+            ReferencedContainer = "container:Straudio-iOS.xcodeproj">
+         </BuildableReference>
+      </MacroExpansion>
       <Testables>
       </Testables>
    </TestAction>
    <LaunchAction
       buildConfiguration = "Debug"
-      selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
-      selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
+      selectedDebuggerIdentifier = ""
+      selectedLauncherIdentifier = "Xcode.IDEFoundation.Launcher.PosixSpawn"
       launchStyle = "0"
       askForAppToLaunch = "Yes"
       useCustomWorkingDirectory = "NO"
       ignoresPersistentStateOnLaunch = "NO"
       debugDocumentVersioning = "YES"
       debugServiceExtension = "internal"
-      enableGPUFrameCaptureMode = "3"
-      enableGPUValidationMode = "1"
       allowLocationSimulation = "YES"
       launchAutomaticallySubstyle = "2">
+      <RemoteRunnable
+         runnableDebuggingMode = "0"
+         BundleIdentifier = "com.apple.mobilegarageband"
+         RemotePath = "/var/containers/Bundle/Application/74C93F51-F99D-4B44-96B7-AB28FB694382/MobileGarageBand.app">
+      </RemoteRunnable>
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "4F39075F2013EBA300DDA490"
-            BuildableName = "Straudio.appex"
-            BlueprintName = "AUv3"
-            ReferencedContainer = "container:Straudio-macOS.xcodeproj">
+            BlueprintIdentifier = "91236D0C1B08F42B00734C5E"
+            BuildableName = "Straudio.app"
+            BlueprintName = "App"
+            ReferencedContainer = "container:Straudio-iOS.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
-      <CommandLineArguments>
-         <CommandLineArgument
-            argument = "-v aufx Ipef Acme"
-            isEnabled = "NO">
-         </CommandLineArgument>
-      </CommandLineArguments>
    </LaunchAction>
    <ProfileAction
       buildConfiguration = "Release"
@@ -82,15 +88,16 @@
       useCustomWorkingDirectory = "NO"
       debugDocumentVersioning = "YES"
       launchAutomaticallySubstyle = "2">
-      <MacroExpansion>
+      <BuildableProductRunnable
+         runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "4F39075F2013EBA300DDA490"
-            BuildableName = "Straudio.appex"
-            BlueprintName = "AUv3"
-            ReferencedContainer = "container:Straudio-macOS.xcodeproj">
+            BlueprintIdentifier = "91236D0C1B08F42B00734C5E"
+            BuildableName = "Straudio.app"
+            BlueprintName = "App"
+            ReferencedContainer = "container:Straudio-iOS.xcodeproj">
          </BuildableReference>
-      </MacroExpansion>
+      </BuildableProductRunnable>
    </ProfileAction>
    <AnalyzeAction
       buildConfiguration = "Debug">

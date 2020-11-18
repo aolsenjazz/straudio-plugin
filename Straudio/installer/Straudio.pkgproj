@@ -478,7 +478,7 @@
 				<key>CONCLUSION_ACTION</key>
 				<integer>0</integer>
 				<key>IDENTIFIER</key>
-				<string>com.ao.app.pkg.Straudio</string>
+				<string>com.AOFX.app.pkg.Straudio</string>
 				<key>NAME</key>
 				<string>Application</string>
 				<key>OVERWRITE_PERMISSIONS</key>
@@ -1014,7 +1014,7 @@
 				<key>CONCLUSION_ACTION</key>
 				<integer>0</integer>
 				<key>IDENTIFIER</key>
-				<string>com.ao.vst.pkg.Straudio</string>
+				<string>com.AOFX.vst.pkg.Straudio</string>
 				<key>LOCATION</key>
 				<integer>0</integer>
 				<key>NAME</key>
@@ -1554,7 +1554,7 @@
 				<key>CONCLUSION_ACTION</key>
 				<integer>0</integer>
 				<key>IDENTIFIER</key>
-				<string>com.ao.vst3.pkg.Straudio</string>
+				<string>com.AOFX.vst3.pkg.Straudio</string>
 				<key>LOCATION</key>
 				<integer>0</integer>
 				<key>NAME</key>
@@ -2094,7 +2094,7 @@
 				<key>CONCLUSION_ACTION</key>
 				<integer>0</integer>
 				<key>IDENTIFIER</key>
-				<string>com.ao.au.pkg.Straudio</string>
+				<string>com.AOFX.au.pkg.Straudio</string>
 				<key>LOCATION</key>
 				<integer>0</integer>
 				<key>NAME</key>
@@ -2634,7 +2634,7 @@
 				<key>CONCLUSION_ACTION</key>
 				<integer>0</integer>
 				<key>IDENTIFIER</key>
-				<string>com.ao.aax.pkg.Straudio</string>
+				<string>com.AOFX.aax.pkg.Straudio</string>
 				<key>LOCATION</key>
 				<integer>0</integer>
 				<key>NAME</key>

@@ -30,7 +30,7 @@ Straudio::Straudio(const iplug::InstanceInfo& info)
 	uploadBuffer = std::make_unique<TypedUploadBuffer<short>>(boundSend, boundUpdateAudio, GetSampleRate());
 	
 	mMakeGraphicsFunc = [&]() {
-		return MakeGraphics(*this, PLUG_WIDTH, PLUG_HEIGHT, PLUG_FPS, GetScaleForScreen(PLUG_HEIGHT));
+		return MakeGraphics(*this, PLUG_WIDTH, PLUG_HEIGHT, PLUG_FPS, GetScaleForScreen(PLUG_WIDTH, PLUG_HEIGHT));
 	};
 	mLayoutFunc = [&](iplug::igraphics::IGraphics* pGraphics) {
 		// Global Stuff

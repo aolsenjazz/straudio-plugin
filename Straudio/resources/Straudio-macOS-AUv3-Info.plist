@@ -7,9 +7,9 @@
 	<key>CFBundleExecutable</key>
 	<string>Straudio</string>
 	<key>CFBundleGetInfoString</key>
-	<string>Straudio v1.0.0 Copyright 2019 Aofx Inc</string>
+	<string>Straudio v0.0.16 Copyright 2020 AOFX Inc</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.ao.app.Straudio.AUv3</string>
+	<string>com.AOFX.app.Straudio.AUv3</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
@@ -17,9 +17,9 @@
 	<key>CFBundlePackageType</key>
 	<string>XPC!</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.0.0</string>
+	<string>0.0.16</string>
 	<key>CFBundleVersion</key>
-	<string>1.0.0</string>
+	<string>0.0.16</string>
 	<key>LSMinimumSystemVersion</key>
 	<string>10.12.0</string>
 	<key>NSExtension</key>
@@ -27,7 +27,7 @@
 		<key>NSExtensionAttributes</key>
 		<dict>
 			<key>AudioComponentBundle</key>
-			<string>com.ao.app.Straudio.AUv3Framework</string>
+			<string>com.AOFX.app.Straudio.AUv3Framework</string>
 			<key>AudioComponents</key>
 			<array>
 				<dict>
@@ -36,7 +36,7 @@
 					<key>manufacturer</key>
 					<string>Aofx</string>
 					<key>name</key>
-					<string>AlexanderOlsen: Straudio</string>
+					<string>Alexander Olsen: Straudio</string>
 					<key>sandboxSafe</key>
 					<true/>
 					<key>subtype</key>
@@ -48,7 +48,7 @@
 					<key>type</key>
 					<string>aufx</string>
 					<key>version</key>
-					<integer>65536</integer>
+					<integer>16</integer>
 				</dict>
 			</array>
 		</dict>

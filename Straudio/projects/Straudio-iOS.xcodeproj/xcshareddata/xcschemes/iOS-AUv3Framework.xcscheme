@@ -14,10 +14,10 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "4FB600121567CB0A0020189A"
-               BuildableName = "Straudio.aaxplugin"
-               BlueprintName = "AAX"
-               ReferencedContainer = "container:Straudio-macOS.xcodeproj">
+               BlueprintIdentifier = "4FA61F6D22E899B500A92C58"
+               BuildableName = "AUv3Framework.framework"
+               BlueprintName = "AUv3Framework"
+               ReferencedContainer = "container:Straudio-iOS.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -39,21 +39,14 @@
       ignoresPersistentStateOnLaunch = "NO"
       debugDocumentVersioning = "YES"
       debugServiceExtension = "internal"
-      enableGPUFrameCaptureMode = "3"
-      enableGPUValidationMode = "1"
       allowLocationSimulation = "YES">
-      <PathRunnable
-         runnableDebuggingMode = "0"
-         BundleIdentifier = "com.avid.ProTools"
-         FilePath = "/Applications/Avid/ProTools_3PDev/Pro Tools.app">
-      </PathRunnable>
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "4FB600121567CB0A0020189A"
-            BuildableName = "Straudio.aaxplugin"
-            BlueprintName = "AAX"
-            ReferencedContainer = "container:Straudio-macOS.xcodeproj">
+            BlueprintIdentifier = "4FA61F6D22E899B500A92C58"
+            BuildableName = "AUv3Framework.framework"
+            BlueprintName = "AUv3Framework"
+            ReferencedContainer = "container:Straudio-iOS.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
    </LaunchAction>
@@ -63,10 +56,15 @@
       savedToolIdentifier = ""
       useCustomWorkingDirectory = "NO"
       debugDocumentVersioning = "YES">
-      <PathRunnable
-         runnableDebuggingMode = "0"
-         FilePath = "/Applications/Avid/ProTools_3PDev/Pro Tools.app">
-      </PathRunnable>
+      <MacroExpansion>
+         <BuildableReference
+            BuildableIdentifier = "primary"
+            BlueprintIdentifier = "4FA61F6D22E899B500A92C58"
+            BuildableName = "AUv3Framework.framework"
+            BlueprintName = "AUv3Framework"
+            ReferencedContainer = "container:Straudio-iOS.xcodeproj">
+         </BuildableReference>
+      </MacroExpansion>
    </ProfileAction>
    <AnalyzeAction
       buildConfiguration = "Debug">

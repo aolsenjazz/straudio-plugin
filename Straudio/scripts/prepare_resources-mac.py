@@ -145,7 +145,7 @@ def main():
   auv3['CFBundlePackageType'] = "XPC!"
   auv3['NSExtension'] = dict(
   NSExtensionAttributes = dict(
-                               AudioComponentBundle = "com.ao.app." + config['BUNDLE_NAME'] + ".AUv3Framework",
+                               AudioComponentBundle = "com.AOFX.app." + config['BUNDLE_NAME'] + ".AUv3Framework",
                                AudioComponents = [{}]),
 #                               NSExtensionServiceRoleType = "NSExtensionServiceRoleTypeEditor",
   NSExtensionPointIdentifier = NSEXTENSIONPOINTIDENTIFIER,
