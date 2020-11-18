@@ -27,6 +27,7 @@ private:
 	std::function<void(std::string, std::string, std::string)> _remoteDescriptionCb;
 	std::function<void(std::string, std::string, std::string)> _remoteCandidateCb;
 	std::function<void(std::string)> _closeRtcCb;
+	std::function<void(std::string)> _createPCCallback;
 	
 	bool destructing = false;
 	
@@ -82,6 +83,8 @@ private:
 	void _onClientJoin(nlohmann::json j) {
 		std::string clientId = j["client"]["id"].get<std::string>();
 		PLOG_INFO << "Client[" << clientId << "] joined room";
+		
+		_createPCCallback(clientId);
 	}
 	void _onClientLeave(nlohmann::json j) {
 		std::string clientId = j["client"]["id"].get<std::string>();
@@ -137,7 +140,8 @@ public:
 				  std::function<void(std::string, std::string)> errorCb,
 				  std::function<void(std::string, std::string, std::string)> descriptionCb,
 				  std::function<void(std::string, std::string, std::string)> candidateCb,
-				  std::function<void(std::string)> closeRtcCb) {
+				  std::function<void(std::string)> closeRtcCb,
+				  std::function<void(std::string)> createPCCallback) {
 		room = r;
 		signalState = sigState;
 		
@@ -147,6 +151,7 @@ public:
 		_errorCb = errorCb;
 		_remoteDescriptionCb = descriptionCb;
 		_closeRtcCb = closeRtcCb;
+		_createPCCallback = createPCCallback;
 		
 		std::ostringstream os;
 		os << (USE_TLS ? "wss://" : "ws://") << SIGNAL_HOST << ":" << SIGNAL_PORT << "/";

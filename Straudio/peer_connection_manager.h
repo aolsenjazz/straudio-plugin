@@ -20,9 +20,9 @@ private:
 	void _onPCGatheringStateChange(rtc::PeerConnection::GatheringState state) { /** noop */ }
 	
 	void _initDataChannel(std::shared_ptr<rtc::DataChannel> dc, std::string sourceId) {
-		PLOG_INFO << "DataChannel with Client[" << sourceId << "] open";
+		dc->onOpen([sourceId]() { PLOG_INFO << "DataChannel with Client[" << sourceId << "] open"; });
 		
-		dc->onClosed([sourceId]() { std::cout << "DataChannel from " << sourceId << " closed" << std::endl; });
+		dc->onClosed([sourceId]() { PLOG_INFO << "DataChannel from " << sourceId << " closed" << std::endl; });
 
 		dc->onMessage([sourceId](const std::variant<rtc::binary, std::string> &message) {});
 		
@@ -42,29 +42,42 @@ public:
 		reset();
 	}
 	
-	std::shared_ptr<rtc::PeerConnection> createPeerConnection(std::string sourceId, std::string type, std::string desc) {
+	std::shared_ptr<rtc::PeerConnection> createPeerConnection(std::string targetId) {
 		auto pc = std::make_shared<rtc::PeerConnection>(_config);
 
 		pc->onStateChange(std::bind(&PeerConnectionManager::_onPCStateChange, this, _1));
 		pc->onGatheringStateChange(std::bind(&PeerConnectionManager::_onPCGatheringStateChange, this, _1));
 
-		pc->onLocalDescription([&, sourceId](const rtc::Description &description) {
-			_localDescriptionCb(sourceId, description.typeString(), std::string(description));
+		pc->onLocalDescription([&, targetId](const rtc::Description &description) {
+			_localDescriptionCb(targetId, description.typeString(), std::string(description));
 		});
 
-		pc->onLocalCandidate([&, sourceId](const rtc::Candidate &candidate) {
-			_localCandidateCb(sourceId, candidate.mid(), std::string(candidate));
+		pc->onLocalCandidate([&, targetId](const rtc::Candidate &candidate) {
+			_localCandidateCb(targetId, candidate.mid(), std::string(candidate));
 		});
-
-		pc->onDataChannel(std::bind(&PeerConnectionManager::_initDataChannel, this, _1, sourceId));
-
-		_peerConnections.emplace(sourceId, pc);
+		
+		rtc::Reliability reliability = {
+			rtc::Reliability::Type::Rexmit,
+			true,
+			0
+		};
+		rtc::DataChannelInit init = {
+			reliability,
+			false,
+			rtc::nullopt,
+			""
+		};
+		auto dc = pc->createDataChannel(targetId, init);
+		
+		_initDataChannel(dc, targetId);
+		
+		_peerConnections.emplace(targetId, pc);
 
 		return pc;
 	}
 	
 	void setRemoteDescription(std::string sourceId, std::string type, std::string description) {
-		createPeerConnection(sourceId, type, description);
+		PLOG_INFO << "Setting remote description[" << description << "]" << std::endl;
 		
 		std::shared_ptr<rtc::PeerConnection> pc;
 		if (auto jt = _peerConnections.find(sourceId); jt != _peerConnections.end()) {
@@ -76,6 +89,8 @@ public:
 	}
 	
 	void addRemoteCandidate(std::string sourceId, std::string mid, std::string candidate) {
+		PLOG_INFO << "Adding remote candidate[" << candidate << "]" << std::endl;
+		
 		std::shared_ptr<rtc::PeerConnection> pc;
 		if (auto jt = _peerConnections.find(sourceId); jt != _peerConnections.end()) {
 			pc = jt->second;

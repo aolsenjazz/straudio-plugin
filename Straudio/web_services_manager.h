@@ -47,10 +47,12 @@ public:
 		auto boundRemoteDesc = std::bind(&WebServicesManager::onRemoteDescription, this, _1, _2, _3);
 		auto boundRemoteICE = std::bind(&WebServicesManager::onRemoteICECandidate, this, _1, _2, _3);
 		auto boundCloseRtc = std::bind(&WebServicesManager::closeRtcConnection, this, _1);
+		auto boundCreatePeerConnection = std::bind(&WebServicesManager::createPeerConnection, this, _1);
 		
 		ss = std::make_unique<SignalService>(roomPtr, signalStatePtr,
 											 signalStateChangeCb, roomStateChangeCb, errorCb,
-											 boundRemoteDesc, boundRemoteICE, boundCloseRtc);
+											 boundRemoteDesc, boundRemoteICE, boundCloseRtc,
+											 boundCreatePeerConnection);
 		
 		auto boundLocalDesc = std::bind(&WebServicesManager::_onLocalDescription, this, _1, _2, _3);
 		auto boundLocalCand = std::bind(&WebServicesManager::_onLocalCandidate, this, _1, _2, _3);
@@ -77,5 +79,9 @@ public:
 	
 	void closePeerConnections() {
 		pcm->reset();
+	}
+	
+	void createPeerConnection(std::string targetId) {
+		pcm->createPeerConnection(targetId);
 	}
 };
