@@ -3,7 +3,7 @@
 #define SIGNAL_PORT 4443
 #define HTTP_PORT 3000
 
-#define LOG_SIZE 10000
+#define LOG_SIZE 100000
 #define MAX_LOGS 1
 
 #ifdef _WIN32

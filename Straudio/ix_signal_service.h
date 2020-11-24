@@ -84,13 +84,18 @@ private:
 		std::string clientId = j["client"]["id"].get<std::string>();
 		PLOG_INFO << "Client[" << clientId << "] joined room";
 		
+		room->addParticipant(Participant(j["client"]));
+		
+		_roomStateChangeCb();
 		_createPCCallback(clientId);
 	}
 	void _onClientLeave(nlohmann::json j) {
 		std::string clientId = j["client"]["id"].get<std::string>();
-		
 		PLOG_INFO << "Client[" << clientId << "] left room";
 		
+		room->removeParticipant(clientId);
+		
+		_roomStateChangeCb();
 		_closeRtcCb(clientId);
 	}
 	

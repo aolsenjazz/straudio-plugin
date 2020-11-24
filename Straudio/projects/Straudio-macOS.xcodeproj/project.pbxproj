@@ -606,8 +606,6 @@
 		AFAD4621256495FF00EBB24D /* build_config.h in Headers */ = {isa = PBXBuildFile; fileRef = AFAD460E256495FD00EBB24D /* build_config.h */; };
 		AFAD4622256495FF00EBB24D /* ix_signal_service.h in Headers */ = {isa = PBXBuildFile; fileRef = AFAD460F256495FD00EBB24D /* ix_signal_service.h */; };
 		AFAD4623256495FF00EBB24D /* ix_signal_service.h in Headers */ = {isa = PBXBuildFile; fileRef = AFAD460F256495FD00EBB24D /* ix_signal_service.h */; };
-		AFAD4624256495FF00EBB24D /* typed_upload_buffer.h in Headers */ = {isa = PBXBuildFile; fileRef = AFAD4610256495FD00EBB24D /* typed_upload_buffer.h */; };
-		AFAD4625256495FF00EBB24D /* typed_upload_buffer.h in Headers */ = {isa = PBXBuildFile; fileRef = AFAD4610256495FD00EBB24D /* typed_upload_buffer.h */; };
 		AFAD4626256495FF00EBB24D /* web_services_manager.h in Headers */ = {isa = PBXBuildFile; fileRef = AFAD4611256495FE00EBB24D /* web_services_manager.h */; };
 		AFAD4627256495FF00EBB24D /* web_services_manager.h in Headers */ = {isa = PBXBuildFile; fileRef = AFAD4611256495FE00EBB24D /* web_services_manager.h */; };
 		AFAD4628256495FF00EBB24D /* Straudio.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AFAD4612256495FE00EBB24D /* Straudio.cpp */; };
@@ -1346,7 +1344,6 @@
 		AFAD460D256495FD00EBB24D /* upload_buffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = upload_buffer.h; path = ../upload_buffer.h; sourceTree = "<group>"; };
 		AFAD460E256495FD00EBB24D /* build_config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = build_config.h; path = ../build_config.h; sourceTree = "<group>"; };
 		AFAD460F256495FD00EBB24D /* ix_signal_service.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ix_signal_service.h; path = ../ix_signal_service.h; sourceTree = "<group>"; };
-		AFAD4610256495FD00EBB24D /* typed_upload_buffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = typed_upload_buffer.h; path = ../typed_upload_buffer.h; sourceTree = "<group>"; };
 		AFAD4611256495FE00EBB24D /* web_services_manager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = web_services_manager.h; path = ../web_services_manager.h; sourceTree = "<group>"; };
 		AFAD4612256495FE00EBB24D /* Straudio.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Straudio.cpp; path = ../Straudio.cpp; sourceTree = "<group>"; };
 		AFAD4613256495FE00EBB24D /* timeout_executor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = timeout_executor.h; path = ../timeout_executor.h; sourceTree = "<group>"; };
@@ -1574,7 +1571,6 @@
 				AFAD4612256495FE00EBB24D /* Straudio.cpp */,
 				AFAD461D256495FF00EBB24D /* Straudio.h */,
 				AFAD4613256495FE00EBB24D /* timeout_executor.h */,
-				AFAD4610256495FD00EBB24D /* typed_upload_buffer.h */,
 				AFAD460D256495FD00EBB24D /* upload_buffer.h */,
 				AFAD4611256495FE00EBB24D /* web_services_manager.h */,
 				4F9313232315CA1100DB2383 /* README.md */,
@@ -2771,7 +2767,6 @@
 				AF59269825649C3000FC7825 /* samplerate.h in Headers */,
 				AF59267A25649C3000FC7825 /* IXWebSocketHttpHeaders.h in Headers */,
 				AF59264625649C3000FC7825 /* IXWebSocketInitResult.h in Headers */,
-				AFAD4625256495FF00EBB24D /* typed_upload_buffer.h in Headers */,
 				AF59266025649C3000FC7825 /* IXConnectionInfo.h in Headers */,
 				AF59265425649C3000FC7825 /* IXProgressCallback.h in Headers */,
 				AF59275D25649C3900FC7825 /* candidate.hpp in Headers */,
@@ -2978,7 +2973,6 @@
 				AF5927A625649C3A00FC7825 /* internal_iterator.hpp in Headers */,
 				4F03A5D520A4621100EBDFFB /* IGraphicsConstants.h in Headers */,
 				AF59279825649C3A00FC7825 /* json_pointer.hpp in Headers */,
-				AFAD4624256495FF00EBB24D /* typed_upload_buffer.h in Headers */,
 				4FF3205820B2BFAB00269268 /* IPlugPaths.h in Headers */,
 				AFAD463C256495FF00EBB24D /* http_client.h in Headers */,
 				AF5927A425649C3A00FC7825 /* iterator_traits.hpp in Headers */,

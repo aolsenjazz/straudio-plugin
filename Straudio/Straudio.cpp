@@ -15,6 +15,7 @@ using namespace std::placeholders;
 
 Straudio::Straudio(const iplug::InstanceInfo& info)
 : iplug::Plugin(info, iplug::MakeConfig(kNumParams, kNumPrograms)) {
+	// initialize the websocket library
 	ix::initNetSystem();
 
 	GetParam(kMonitor)->InitBool("Monitor", false);
@@ -55,7 +56,7 @@ void Straudio::OnUIClose() {
 }
 
 void Straudio::OnIdle() {
-	if (uploadBuffer != nullptr) {
+	if (uploadBuffer != nullptr && !room->isEmpty()) {
 		uploadBuffer->upload();
 	}
 }
@@ -136,7 +137,9 @@ void Straudio::ProcessBlock(iplug::sample** inputs, iplug::sample** outputs, int
 	if (GetParam(kMonitor)->Bool()) AudioPropagator::propagateAudio(inputs, outputs, nFrames, nChans);
 	else AudioPropagator::propagateSilence(outputs, nFrames, nChans);
 
-	uploadBuffer->processBlock(inputs, nFrames, nChans);
+	if (!room->isEmpty()) {
+		uploadBuffer->processBlock(inputs, nFrames, nChans);
+	}
 }
 
 template <typename T>

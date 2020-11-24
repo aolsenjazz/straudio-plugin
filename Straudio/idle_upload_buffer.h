@@ -11,8 +11,6 @@
  |0-8192 bytes PCM|
  |_________________|
  
- Dtype will always be Float32 from now on. I'm keeping the capability for different data types just in case, but the whole system is more performant
- using Float32 because the web audio API is built to handle Float32 data.
  */
 
 #pragma once
@@ -28,75 +26,119 @@ class TypedUploadBuffer : public UploadBuffer {
 	
 private:
 	
-	bool doResample = true;
-	
 	/**
 	 Sent as second part of header. Informs clients of how to transform data
 	 */
-	const double DTYPE_INT16 = 0;
+	static constexpr double DTYPE_INT16 = 0;
 	
 	/**
 	Sent as second part of header. Informs clients of how to transform data
 	*/
-	const double DTYPE_FLOAT32 = 1;
-	
-	int _outputSampleRate = 40000;
-
-	SRC_DATA srcData;
+	static constexpr double DTYPE_FLOAT32 = 1;
 	
 	/**
-	 20000 is an arbitrary size. As long as size is > 8200, shouldn't matter much
+	 192k = 1 second of audio at max sample rate. Also 100% arbitrary. See _swapBuffer1, _resampleOut for more
 	 */
-	float activeBufferArray[200000];
-	float inactiveBufferArray[200000];
+	static constexpr int BUFFER_SIZE = 16384;
 	
-	float* activeBuffer = activeBufferArray;
-	float* inactiveBuffer = inactiveBufferArray;
+	/**
+	 If the _outputSampleRate == inputSampleRate, this is set to false. Also will be set to false on resampling error
+	 */
+	bool _doResample = true;
 	
-	int* activeIndex = new int(0);
-	int* inactiveIndex = new int(0);
+	/**
+	 Guards sensitive read/write operations in processBlock() and upload()
+	 */
+	std::mutex _bufferSwapMtx;
 	
-	bool swap = false;
+	/**
+	 Guards against replacing the src while we're actively using it in upload()
+	 */
+	std::mutex _srcMtx;
 	
-	float _resampleOut[200000];
-	T _uploadBuffer[200000];
+	/**
+	 Data is resampled to this rate if different from the DAW's internal sample rate
+	 */
+	int _outputSampleRate = 40000;
+
+	/**
+	 The struct used to resample audio data before transmitting to clients
+	 */
+	SRC_DATA _srcData;
 	
+	/**
+	 Sample rate converter
+	 http://www.mega-nerd.com/SRC/api.html
+	 */
+	SRC_STATE *_src = nullptr;
+	
+	/**
+	 The audio thread is constantly writing audio data to one
+	 of these two buffers. OnIdle(), swap which buffer is being written into while the other is resampled (if necessary) and transmitted to clients.
+	 These array shouldn't be accessed directly; swapBuffer1 and swapBuffer2 pointers should be used
+	 */
+	float _swapBuffer1[BUFFER_SIZE];
+	float _swapBuffer2[BUFFER_SIZE];
+	
+	/**
+	 Used to track write process into the buffers in processBlock(), and to determine how much data to resample/transmit in upload().
+	 These values are swapped in every OnIdle() like their accompanying buffers.
+	 */
+	int _swapBufferIndex1 = 0;
+	int _swapBufferIndex2 = 0;
+	
+	/**
+	 Don't bother uploading the contents of a buffer if it's all 0's. These bools track whether each buffer is silent
+	 */
+	bool _swapBuffer1Silent = true;
+	bool _swapBuffer2Silent = true;
+	
+	/**
+	 During every OnIdle(), this is set to !_swap. Changing this bool swap which buffer the audio thread is writing into, allowing for the
+	 OnIdle thread to resample and transmit to clients concurrently
+	 */
+	bool _swap = false;
+	
+	/**
+	 The destination to which resampled audio is written via src_process in _resampleData
+	 */
+	float _resampleOut[BUFFER_SIZE];
+	
+	/**
+	 The buffer to which data is written before sending to the websocket. T is of type short of float32
+	 */
+	T _uploadBuffer[BUFFER_SIZE];
+	
+	/**
+	 Called in upload() to transfer data to the websocket service.
+	 */
 	std::function<void(T*, size_t)> _submitFunc;
 	
 	/**
-	 USED IN process_block. Removed variable declarations because optimizations
+	 The index of the timestamp, stored as a double, in each message sent to client
 	 */
-	bool notSilent = false;
-	int dataToTransmit = 0;
-	int processError = 0;
-	int bodyIndex = getBodyIndex();
-	int typeMult = dTypeMultiplier();
-	/**
-	 </USED IN process_block>
-	 */
-	
-	int getTimestampIndex() {
+	int _getTimestampIndex() {
 		return 0;
 	}
 	
 	/**
 	 Returns the index of the data type portion of header
 	 */
-	int getDTypeIndex() {
-		return getTimestampLength();
+	int _getDTypeIndex() {
+		return _getTimestampLength();
 	}
 	
 	/**
 	 Returns the first index in buffer at which PCM data starts
 	 */
-	int getBodyIndex() {
-		return getHeaderSize() / sizeof(T);
+	int _getBodyIndex() {
+		return _getHeaderSize() / sizeof(T);
 	}
 	
 	/**
 	 Returns size in bytes of header portion of buffer
 	 */
-	int getHeaderSize() {
+	int _getHeaderSize() {
 		// "sizeof timestamp" plus "sizeof data type"
 		return sizeof(double) + sizeof(double);
 	}
@@ -104,14 +146,14 @@ private:
 	/**
 	 Returns the length (in number of T) of the timestamp. E.g. for T=float32, this will return 2
 	 */
-	int getTimestampLength() {
+	int _getTimestampLength() {
 		return sizeof(double) / sizeof(T);
 	}
 	
 	/**
 	 Returns the data type to send to the client.
 	 */
-	int getDTypeBufferVal() {
+	int _getDTypeBufferVal() {
 		if constexpr (std::is_same_v<T, short>) {
 			return DTYPE_INT16;
 		}
@@ -119,36 +161,66 @@ private:
 		return DTYPE_FLOAT32;
 	}
 	
-	void updateInternals(int nChans) {
-		updateRequired = false;
-		nChannels = nChans;
+	/**
+	 Useful for sending different datatypes to the server. E.g. Float32 = 1, int16 = SHRT_MAX
+	 */
+	int _dTypeMultiplier() {
+		if constexpr (std::is_same_v<T, short>) {
+			return SHRT_MAX;
+		}
 		
-		// if we need to resample, init src
-		if (inputSampleRate != outputSampleRate()) {
-			// cleanup old sample rate converter
-			src_delete(src);
-
-			// initialize a new sample rate converter
+		return 1;
+	}
+	
+	void _updateInternals(int nChans) {
+		updateRequired = false;
+		
+		if (inputSampleRate != outputSampleRate() || nChannels != nChans) {
+			_srcMutex.lock();
+			// delete the old src if exists, init new
+			if (_src != nullptr) src_delete(_src);
+			
+			// initialize the sample rate converter
 			int* error = new int;
-//			src = src_new(SRC_LINEAR, nChans, error);
-			src = src_new(SRC_SINC_BEST_QUALITY, nChans, error);
-			if (*error != 0) {
-				doResample = false;
-				_outputSampleRate = inputSampleRate;
-				return;
-			}
-
-			// update src data object
-			srcData.src_ratio = outputSampleRate() / (double) inputSampleRate;
-			doResample = true;
-
-			// clean up
+			_src = src_new(SRC_SINC_BEST_QUALITY, nChans, error);
+			if (*error != 0) _outputSampleRate = inputSampleRate;
+			
+			_srcMutex.unlock();
+				
+			_doResample = *error == 0;
+			_srcData.src_ratio = outputSampleRate() / (double) inputSampleRate;
+			nChannels = nChans;
 			delete error;
 		} else {
-			doResample = false;
+			_doResample = false;
 		}
 		
 		_onReadyCb(outputSampleRate(), nChannels, bitDepth());
+	}
+	
+	int resampleData(int nSamplesToResample, float *sourceBuffer) {
+		_srcData.input_frames = nSamplesToResample / nChannels;
+		_srcData.output_frames = nSamplesToResample / nChannels;
+		_srcData.data_in = sourceBuffer;
+	
+		int processError = src_process(_src, &_srcData);
+		if (processError != 0) {
+			PLOG_ERROR << processError << std::endl;
+
+			_doResample = false; // if resampling fails, stop resampling
+			_outputSampleRate = inputSampleRate;
+		}
+		
+		return _srcData.output_frames_gen * nChannels;
+	}
+	
+	int copyToUploadBuffer(int startIndex, int nSamplesToCopy, float *sourceBuffer) {
+		// copy resampled data into the upload buffer
+		for (int j = 0; j < nSamplesToCopy; j++) {
+			_uploadBuffer[j + startIndex] = (sourceBuffer[j] > 1) ? _dTypeMultiplier() : sourceBuffer[j] * _dTypeMultiplier();
+		}
+		
+		return nSamplesToCopy * sizeof(T) + _getHeaderSize();
 	}
 	
 public:
@@ -157,8 +229,12 @@ public:
 	: UploadBuffer(onReadyCb, sampleR) {
 		_submitFunc = submitFunc;
 		
-		srcData.end_of_input = 0;
-		srcData.data_out = _resampleOut;
+		_srcData.end_of_input = 0;
+		_srcData.data_out = _resampleOut;
+	}
+	
+	~TypedUploadBuffer() {
+		src_delete(_src);
 	}
 	
 	int bitDepth() {
@@ -169,85 +245,70 @@ public:
 		return _outputSampleRate;
 	}
 	
-	/**
-	 Useful for sending different datatypes to the server. E.g. Float32 = 1, int16 = SHRT_MAX
-	 */
-	int dTypeMultiplier() {
-		if constexpr (std::is_same_v<T, short>) {
-			return SHRT_MAX;
-		}
-		
-		return 1;
-	}
-	
 	void processBlock(iplug::sample** inputs, int nFrames, int nChans) {
 		// audio settings change, init/reinit sample rate converter
-		if (nChans != nChannels || updateRequired) {
-			updateInternals(nChans);
-		}
+		if (nChans != nChannels || updateRequired) _updateInternals(nChans);
 		
-		int *index = (swap) ? inactiveIndex : activeIndex;
-		float *buffer = (swap) ? inactiveBuffer : activeBuffer;
+		_bufferSwapMtx.lock();
+		int *relevantIndex = (_swap) ? &_swapBufferIndex2 : &_swapBufferIndex1;
+		bool *isSilent = (_swap) ? &_swapBuffer2Silent : &_swapBuffer1Silent;
+		
+		// if we're about to go outside the swap buffers, reset their index to 0
+		if (*relevantIndex >= BUFFER_SIZE - (nFrames * nChans)) *relevantIndex = 0;
+		
+		int index = *relevantIndex;
+		*relevantIndex += (nFrames * nChans);
+		
+		float *buffer = (_swap) ? _swapBuffer2 : _swapBuffer1;
+		_bufferSwapMtx.unlock();
 		
 		// just copy input to the upload buffer
 		for (int s = 0; s < nFrames; s++) {
 			for (int c = 0; c < nChans; c++) {
 				if (inputs[c][s] != 0) {
-					notSilent = true;
+					*isSilent = false;
 				}
-				
-				buffer[*index] = inputs[c][s] > 1 ? 1 : inputs[c][s];
-				(*index)++;
+
+				buffer[index] = inputs[c][s] > 1 ? 1 : inputs[c][s];
+				(index)++;
 			}
 		}
 	}
 	
 	void upload() {
-		swap = !swap;
+		// Do all race-condition-vulnerable reads/writes
+		_bufferSwapMtx.lock();
+		_swap = !_swap;
 		
-		int *index = (swap) ? activeIndex : inactiveIndex;
-		float *buffer = (swap) ? activeBuffer : inactiveBuffer;
+		int   *relevantIndex = (_swap) ? &_swapBufferIndex1  : &_swapBufferIndex2;
+		bool  *isSilent      = (_swap) ? &_swapBuffer1Silent : &_swapBuffer2Silent;
+		float *buffer        = (_swap) ? _swapBuffer1        : _swapBuffer2;
+		int nSamples = *relevantIndex;
+		*relevantIndex = 0;
 		
-		if (*index == 0) return;
-		
-		// resample if necessary
-		if (doResample) {
-			srcData.input_frames = *index / nChannels;
-			srcData.output_frames = *index / nChannels;
-			srcData.data_in = buffer;
-
-			processError = src_process(src, &srcData);
-			if (processError != 0) {
-				PLOG_ERROR << processError << std::endl;
-
-				doResample = false; // if resampling fails, stop resampling
-				_outputSampleRate = inputSampleRate;
-			}
-
-			// copy resampled data into the upload buffer
-			for (int j = 0; j < srcData.output_frames_gen * nChannels; j++) {
-				_uploadBuffer[j + bodyIndex] = (_resampleOut[j] > 1) ? typeMult : _resampleOut[j] * typeMult;
-			}
-			
-			dataToTransmit = srcData.output_frames_gen * nChannels * sizeof(T) + getHeaderSize();
-		} else {
-			for (int j = 0; j < *index; j++) {
-				_uploadBuffer[j + bodyIndex] = inactiveBuffer[j] * typeMult;
-			}
-			
-			dataToTransmit = *index * sizeof(T) + getHeaderSize();
+		// if the buffer is all zeroes, or nothing was written, don't bother resampling and uploading
+		if (nSamples == 0 || *isSilent == true) {
+			_bufferSwapMtx.unlock();
+			return;
 		}
-		*index = 0;
 		
+		*isSilent = true;
+		
+		_bufferSwapMtx.unlock();
+		
+		_srcMutex.lock();
+		int nOutputSamples = (_doResample) ? resampleData(nSamples, buffer) : nSamples;
+		float *buffToCopy  = (_doResample) ? _resampleOut : buffer;
+		int dataToTransmit = copyToUploadBuffer(_getBodyIndex(), nOutputSamples, buffToCopy);
+		_srcMutex.unlock();
+
 		// add headers
 		double* timestampPtr = (double*) &_uploadBuffer[0];
-		double* dtypePtr = (double*) &_uploadBuffer[getDTypeIndex()];
+		double* dtypePtr = (double*) &_uploadBuffer[_getDTypeIndex()];
 		*timestampPtr = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
-		*dtypePtr = getDTypeBufferVal();
-		
-//		if (notSilent) {
-			_submitFunc(_uploadBuffer, dataToTransmit);
-//		}
+		*dtypePtr = _getDTypeBufferVal();
+
+		_submitFunc(_uploadBuffer, dataToTransmit);
 	}
 };
 

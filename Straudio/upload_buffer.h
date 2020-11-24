@@ -8,7 +8,6 @@ class UploadBuffer {
 protected:
 	
 	std::function<void(int, int, int)> _onReadyCb;
-	SRC_STATE* src;
 	
 public:
 
@@ -30,7 +29,7 @@ public:
 	}
 	
 	virtual ~UploadBuffer() {
-		src_delete(src);
+
 	}
 	
 	virtual void processBlock(iplug::sample** inputs, int nFrames, int nChans) = 0;

@@ -75,4 +75,27 @@ public:
 		return os.str();
 	}
 	
+	bool isEmpty() {
+		return participants.size() == 0;
+	}
+	
+	void addParticipant(Participant p) {
+		participants.push_back(std::make_shared<Participant>(p));
+	}
+	
+	void removeParticipant(std::string pId) {
+		int idx = -1;
+		for (int i = 0; i < participants.size(); ++i) {
+			if (participants[i]->pId == pId) {
+				idx = i;
+			}
+		}
+		
+		if (idx != -1) {
+			participants.erase(participants.begin() + idx);
+		} else {
+			PLOG_INFO << "tried and failed to remove Participant[" << pId << "]" << std::endl;
+		}
+	}
+	
 };

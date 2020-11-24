@@ -56,18 +56,19 @@ public:
 			_localCandidateCb(targetId, candidate.mid(), std::string(candidate));
 		});
 		
-		rtc::Reliability reliability = {
-			rtc::Reliability::Type::Rexmit,
-			true,
-			0
-		};
-		rtc::DataChannelInit init = {
-			reliability,
-			false,
-			rtc::nullopt,
-			""
-		};
-		auto dc = pc->createDataChannel(targetId, init);
+//		rtc::Reliability reliability = {
+//			rtc::Reliability::Type::Rexmit,
+//			true,
+//			0
+//		};
+//		rtc::DataChannelInit init = {
+//			reliability,
+//			false,
+//			rtc::nullopt,
+//			""
+//		};
+//		auto dc = pc->createDataChannel(targetId, init);
+		auto dc = pc->createDataChannel(targetId);
 		
 		_initDataChannel(dc, targetId);
 		
