@@ -9,11 +9,14 @@ protected:
 	
 	std::function<void(int, int, int)> _onReadyCb;
 	
+	/**
+	 The internal sample rate of the DAW. Potentially different from the _outputSampleRate.
+	 */
+	int inputSampleRate = 0;
+	
 public:
 
-	int inputSampleRate = 0;
 	int nChannels = 0;
-	bool updateRequired = false;
 	
 	/**
 	 nChannels and batchSize probably aren't known when this object is constructed, so these will probably be set in a later processBlock()
@@ -24,10 +27,6 @@ public:
 		inputSampleRate = sampleR;
 	}
 	
-	void notifySettingsChange() {
-		updateRequired = true;
-	}
-	
 	virtual ~UploadBuffer() {
 
 	}
@@ -36,4 +35,5 @@ public:
 	virtual int bitDepth() = 0;
 	virtual int outputSampleRate() = 0;
 	virtual void upload() = 0;
+	virtual void setInputSampleRate(int sampleRate) = 0;
 };

@@ -47,6 +47,12 @@ private:
 	bool _doResample = true;
 	
 	/**
+	 When important audio details are changed (sample rate, nChannels, etc), this is marked as true so that during the next run of processBlock(),
+	 updates are made.
+	 */
+	bool _updateRequired = false;
+	
+	/**
 	 Guards sensitive read/write operations in processBlock() and upload()
 	 */
 	std::mutex _bufferSwapMtx;
@@ -173,10 +179,10 @@ private:
 	}
 	
 	void _updateInternals(int nChans) {
-		updateRequired = false;
+		_updateRequired = false;
 		
 		if (inputSampleRate != outputSampleRate() || nChannels != nChans) {
-			_srcMutex.lock();
+			_srcMtx.lock();
 			// delete the old src if exists, init new
 			if (_src != nullptr) src_delete(_src);
 			
@@ -185,7 +191,7 @@ private:
 			_src = src_new(SRC_SINC_BEST_QUALITY, nChans, error);
 			if (*error != 0) _outputSampleRate = inputSampleRate;
 			
-			_srcMutex.unlock();
+			_srcMtx.unlock();
 				
 			_doResample = *error == 0;
 			_srcData.src_ratio = outputSampleRate() / (double) inputSampleRate;
@@ -245,9 +251,19 @@ public:
 		return _outputSampleRate;
 	}
 	
+	void setInputSampleRate(int sampleRate) {
+		// the structure of this looks silly but is deliberate to account for race conditions
+		if (inputSampleRate != sampleRate) {
+			inputSampleRate = sampleRate;
+			_updateRequired = true;
+		}
+		
+		inputSampleRate = sampleRate;
+	}
+	
 	void processBlock(iplug::sample** inputs, int nFrames, int nChans) {
 		// audio settings change, init/reinit sample rate converter
-		if (nChans != nChannels || updateRequired) _updateInternals(nChans);
+		if (nChans != nChannels || _updateRequired) _updateInternals(nChans);
 		
 		_bufferSwapMtx.lock();
 		int *relevantIndex = (_swap) ? &_swapBufferIndex2 : &_swapBufferIndex1;
@@ -296,11 +312,11 @@ public:
 		
 		_bufferSwapMtx.unlock();
 		
-		_srcMutex.lock();
+		_srcMtx.lock();
 		int nOutputSamples = (_doResample) ? resampleData(nSamples, buffer) : nSamples;
 		float *buffToCopy  = (_doResample) ? _resampleOut : buffer;
 		int dataToTransmit = copyToUploadBuffer(_getBodyIndex(), nOutputSamples, buffToCopy);
-		_srcMutex.unlock();
+		_srcMtx.unlock();
 
 		// add headers
 		double* timestampPtr = (double*) &_uploadBuffer[0];

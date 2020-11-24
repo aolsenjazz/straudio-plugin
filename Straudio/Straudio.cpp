@@ -63,22 +63,15 @@ void Straudio::OnIdle() {
 
 void Straudio::OnActivate(bool active) {
 	PLOG_DEBUG << "OnActivate() -> active = " << active;
-
-	if (active && GetSampleRate() != uploadBuffer->inputSampleRate) {
-		uploadBuffer->inputSampleRate = GetSampleRate();
-		uploadBuffer->notifySettingsChange();
-	}
+	
+	uploadBuffer->setInputSampleRate(GetSampleRate());
 }
 
 void Straudio::OnReset() {
 	PLOG_DEBUG << "OnReset()";
 
 	wsm->notifyBufferReset();
-	
-	if (GetSampleRate() != uploadBuffer->inputSampleRate) {
-		uploadBuffer->inputSampleRate = GetSampleRate();
-		uploadBuffer->notifySettingsChange();
-	}
+	uploadBuffer->setInputSampleRate(GetSampleRate());
 }
 
 void Straudio::onError(std::string severity, std::string message) {
@@ -95,10 +88,6 @@ void Straudio::signalStateChange() {
 	PLOG_DEBUG << "Connection state change. State: " << *signalState;
 
 	if (*signalState == "open") {
-		if (uploadBuffer->nChannels == 0) {
-			PLOG_ERROR << "SENDING 0 CHANNELS~~~" << std::endl;
-		}
-		
 		wsm->ss->createRoom(uploadBuffer->outputSampleRate(), uploadBuffer->nChannels, uploadBuffer->bitDepth());
 	} else {
 		wsm->closePeerConnections(); // something happened with the connection. close peer connections
@@ -122,12 +111,7 @@ void Straudio::roomStateChange() {
 void Straudio::onBufferReady(int sampleRate, int nChans, int bitDepth) {
 	if (room->state == "open" && *signalState == "open") {
 		PLOG_INFO << "Audio details changed. Updating server info...";
-		if (nChans == 0) {
-			PLOG_ERROR << "SENDING 0 CHANNELS~~~" << std::endl;
-		}
 		wsm->updateAudioSettings(sampleRate, nChans, bitDepth);
-	} else {
-		PLOG_DEBUG << "Tried to send audio details while room || signal != open. Ignoring...";
 	}
 }
 
@@ -151,7 +135,7 @@ void Straudio::setRoomStatusMessage(std::string msg) {
 	roomMsg.reset(new std::string(msg));
 
 	if (GetUI()) {
-		// refactor this nonsense (carefully, when you have the time)
+		// TODO: refactor this nonsense (carefully, when you have the time)
 		char const *formatted = roomMsg->c_str();
 		((iplug::igraphics::ITextControl*) GetUI()->GetControlWithTag(69))->SetStr(formatted);
 	}
