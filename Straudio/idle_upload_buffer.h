@@ -228,9 +228,14 @@ private:
 		_onReadyCb(getOutputSampleRate(), nChannels, bitDepth());
 	}
 	
+	/**
+	 Resamples data from _inputSampleRate to _outputSampleRate.
+	 NOTE that _srcData.output_frames is == _srcData.input_frames. This means that the DAW can't effectively upsample
+	 without destroying the sound, the DAW SHOULDN'T be upsampling unless running a debug build. 
+	 */
 	int resampleData(int nSamplesToResample, float *sourceBuffer) {
 		_srcData.input_frames = nSamplesToResample / nChannels;
-		_srcData.output_frames = BUFFER_SIZE;
+		_srcData.output_frames = nSamplesToResample / nChannels;
 		_srcData.data_in = sourceBuffer;
 	
 		int processError = src_process(_src, &_srcData);
