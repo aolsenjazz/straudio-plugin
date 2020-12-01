@@ -231,7 +231,9 @@ private:
 	/**
 	 Resamples data from _inputSampleRate to _outputSampleRate.
 	 NOTE that _srcData.output_frames is == _srcData.input_frames. This means that the DAW can't effectively upsample
-	 without destroying the sound, the DAW SHOULDN'T be upsampling unless running a debug build. 
+	 without destroying the sound, the DAW SHOULDN'T be upsampling unless running a debug build.
+	 
+	 TODO: probably should better support upsampling by setting the _srcData.output_frames correctly
 	 */
 	int resampleData(int nSamplesToResample, float *sourceBuffer) {
 		_srcData.input_frames = nSamplesToResample / nChannels;
