@@ -55,7 +55,6 @@ private:
 	void _onPing() {
 		PLOG_DEBUG << "ping received";
 		
-		
 		if (_heartbeatExecutor != nullptr) {
 			_heartbeatExecutor->interrupt();
 		}

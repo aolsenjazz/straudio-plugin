@@ -11,6 +11,8 @@
 #include "audio_propagator.h"
 #include "idle_upload_buffer.h"
 
+#include "libsamplerate/src_config.h"
+
 using namespace std::placeholders;
 
 Straudio::Straudio(const iplug::InstanceInfo& info)
@@ -19,6 +21,9 @@ Straudio::Straudio(const iplug::InstanceInfo& info)
 	ix::initNetSystem();
 
 	GetParam(kMonitor)->InitBool("Monitor", false);
+	GetParam(kBitDepth)->InitEnum("Bit Depth", 0, 2, "", iplug::IParam::kFlagsNone, "", "16 bit", "32 bit");
+	GetParam(kOutputSampleRate)->InitEnum("Sample Rate", 0, 4, "", iplug::IParam::kFlagsNone, "", "44100", "48000", "88200", "96000");
+	GetParam(kSrcQuality)->InitEnum("SRC Quality", 0, 3, "", iplug::IParam::kFlagsNone, "", "Highest", "Medium", "Fastest");
 	
 	auto boundSigStateChange = std::bind(&Straudio::signalStateChange, this);
 	auto boundRoomStateChange = std::bind(&Straudio::roomStateChange, this);
@@ -28,7 +33,7 @@ Straudio::Straudio(const iplug::InstanceInfo& info)
 	
 	auto boundSend = std::bind(&Straudio::sendData<short>, this, _1, _2);
 	auto boundUpdateAudio = std::bind(&Straudio::onBufferReady, this, _1, _2, _3);
-	uploadBuffer = std::make_unique<TypedUploadBuffer<short>>(boundSend, boundUpdateAudio, GetSampleRate());
+	uploadBuffer = std::make_unique<TypedUploadBuffer<short>>(boundSend, boundUpdateAudio, GetSampleRate());	
 	
 	mMakeGraphicsFunc = [&]() {
 		return MakeGraphics(*this, PLUG_WIDTH, PLUG_HEIGHT, PLUG_FPS, GetScaleForScreen(PLUG_WIDTH, PLUG_HEIGHT));
@@ -39,12 +44,18 @@ Straudio::Straudio(const iplug::InstanceInfo& info)
 		pGraphics->AttachPanelBackground(iplug::igraphics::COLOR_GRAY);
 		pGraphics->LoadFont("Roboto-Regular", ROBOTO_FN);
 		const iplug::igraphics::IRECT root = pGraphics->GetBounds();
-		const iplug::igraphics::IRECT monitorCtrlRect = root.GetFromBRHC(250, 100);
-		const iplug::igraphics::IRECT bitDepthRect = root.GetFromTRHC(250, 100);
+		const iplug::igraphics::IRECT monitorCtrlRect = root.GetGridCell(7, 3, 8, 4);
+		const iplug::igraphics::IRECT bitDepthRect = root.GetGridCell(6, 3, 8, 4);
+		const iplug::igraphics::IRECT sampleRateRect = root.GetGridCell(5, 3, 8, 4);
+		const iplug::igraphics::IRECT srcRect = root.GetGridCell(4, 3, 8, 4);
 		
 		pGraphics->AttachControl(new iplug::igraphics::ITextControl(root.GetMidVPadded(50), roomMsg->c_str(), iplug::igraphics::IText(50)), 69);
 		
 		pGraphics->AttachControl(new iplug::igraphics::IVToggleControl(monitorCtrlRect, kMonitor, "Monitor", iplug::igraphics::DEFAULT_STYLE, "Off", "On"));
+		
+		pGraphics->AttachControl(new iplug::igraphics::ICaptionControl(bitDepthRect, EParams::kBitDepth));
+		pGraphics->AttachControl(new iplug::igraphics::ICaptionControl(sampleRateRect, EParams::kOutputSampleRate));
+		pGraphics->AttachControl(new iplug::igraphics::ICaptionControl(srcRect, EParams::kSrcQuality));
 	  };
 }
 
@@ -80,7 +91,15 @@ void Straudio::onError(std::string severity, std::string message) {
 
 void Straudio::OnParamChange(int paramIdx) {
 	switch(paramIdx) {
-		
+		case kBitDepth:
+			setUploadBuffer(GetParam(paramIdx)->Int());
+			break;
+		case kOutputSampleRate:
+			setOutputSampleRate(GetParam(paramIdx)->Int());
+			break;
+		case kSrcQuality:
+			setSrcQuality(GetParam(paramIdx)->Int());
+			break;
 	}
 }
 
@@ -88,7 +107,7 @@ void Straudio::signalStateChange() {
 	PLOG_DEBUG << "Connection state change. State: " << *signalState;
 
 	if (*signalState == "open") {
-		wsm->ss->createRoom(uploadBuffer->outputSampleRate(), uploadBuffer->nChannels, uploadBuffer->bitDepth());
+		wsm->ss->createRoom(uploadBuffer->getOutputSampleRate(), uploadBuffer->nChannels, uploadBuffer->bitDepth());
 	} else {
 		wsm->closePeerConnections(); // something happened with the connection. close peer connections
 		setRoomStatusMessage("Disconnected...");
@@ -123,6 +142,64 @@ void Straudio::ProcessBlock(iplug::sample** inputs, iplug::sample** outputs, int
 
 	if (!room->isEmpty()) {
 		uploadBuffer->processBlock(inputs, nFrames, nChans);
+	}
+}
+
+void Straudio::setSrcQuality(int enumQualityValue) {
+	int quality = 0;
+	switch (enumQualityValue) {
+		case 0:
+			quality = SRC_SINC_BEST_QUALITY;
+			break;
+		case 1:
+			quality = SRC_SINC_MEDIUM_QUALITY;
+			break;
+		case 2:
+			quality = SRC_SINC_FASTEST;
+		default:
+			quality = SRC_SINC_FASTEST;
+			break;
+	}
+	
+	uploadBuffer->setSrcQuality(quality);
+}
+
+void Straudio::setOutputSampleRate(int enumSrValue) {
+	int sr = 0;
+	
+	switch (enumSrValue) {
+		case 0:
+			sr = 40000;
+			break;
+		case 1:
+			sr = 44100;
+			break;
+		case 2:
+			sr = 48000;
+			break;
+		case 3:
+			sr = 88200;
+			break;
+		case 4:
+			sr = 96000;
+			break;
+		default:
+			
+			break;
+	}
+	
+	uploadBuffer->setOutputSampleRate(sr);
+}
+
+void Straudio::setUploadBuffer(int enumVal) {
+	auto boundUpdateAudio = std::bind(&Straudio::onBufferReady, this, _1, _2, _3);
+	
+	if (enumVal == 0) {
+		auto boundSend = std::bind(&Straudio::sendData<short>, this, _1, _2);
+		uploadBuffer.reset(new TypedUploadBuffer<short>(boundSend, boundUpdateAudio, GetSampleRate(), uploadBuffer->getOutputSampleRate(), uploadBuffer->getSrcQuality()));
+	} else {
+		auto boundSend = std::bind(&Straudio::sendData<float>, this, _1, _2);
+		uploadBuffer.reset(new TypedUploadBuffer<float>(boundSend, boundUpdateAudio, GetSampleRate(), uploadBuffer->getOutputSampleRate(), uploadBuffer->getSrcQuality()));
 	}
 }
 

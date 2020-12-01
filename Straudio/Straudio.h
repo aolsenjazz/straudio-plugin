@@ -10,7 +10,17 @@ int kNumPrograms = 0;
 
 enum EParams {
     kMonitor = 0,
+	kBitDepth,
+	kOutputSampleRate,
+	kSrcQuality,
     kNumParams
+};
+
+enum EControlTags {
+	kCtrlBitDepth,
+	kCtrlOutputSampleRate,
+	kCtrlSrcQuality,
+	kNumCtrlTags
 };
 
 class Straudio final : public iplug::Plugin {
@@ -33,6 +43,9 @@ private:
 	template <typename T>
 	void sendData(T* data, size_t size);
 	void onBufferReady(int sampleRate, int nChans, int bitDepth);
+	void setSrcQuality(int enumSrcValue);
+	void setOutputSampleRate(int enumSrValue);
+	void setUploadBuffer(int enumVal);
 	
 	void setRoomStatusMessage(std::string);
 	

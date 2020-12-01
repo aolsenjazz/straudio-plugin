@@ -33,7 +33,10 @@ public:
 	
 	virtual void processBlock(iplug::sample** inputs, int nFrames, int nChans) = 0;
 	virtual int bitDepth() = 0;
-	virtual int outputSampleRate() = 0;
+	virtual int getOutputSampleRate() = 0;
 	virtual void upload() = 0;
 	virtual void setInputSampleRate(int sampleRate) = 0;
+	virtual void setSrcQuality(int quality) = 0;
+	virtual void setOutputSampleRate(int sampleRate) = 0;
+	virtual int getSrcQuality() = 0;
 };

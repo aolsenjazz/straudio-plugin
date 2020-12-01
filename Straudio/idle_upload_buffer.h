@@ -4,9 +4,11 @@
  is structured as such:
  
  __________________
- | 8 bytes timestamp|
+ | 8 bytes timestamp| ms since epoch
  |_________________|
- | 8 bytes dtype        | DTYPE_INT16 or DTYPE_FLOAT32
+ | 8 bytes dtype        | DTYPE_INT16, DTYPE_FLOAT32, or SILENCE
+ |_________________|
+ | 8 bytes length       | number of samples in the body. only used to instruct clients how many samples of silence to write
  |_________________|
  |0-8192 bytes PCM|
  |_________________|
@@ -37,6 +39,11 @@ private:
 	static constexpr double DTYPE_FLOAT32 = 1;
 	
 	/**
+	 Sent as second part of header (DTYPE). Informs clients to write silence equal to length
+	 */
+	static constexpr double DTYPE_SILENCE = 2;
+	
+	/**
 	 192k = 1 second of audio at max sample rate. Also 100% arbitrary. See _swapBuffer1, _resampleOut for more
 	 */
 	static constexpr int BUFFER_SIZE = 16384;
@@ -65,8 +72,10 @@ private:
 	/**
 	 Data is resampled to this rate if different from the DAW's internal sample rate
 	 */
-	int _outputSampleRate = 40000;
+	int _outputSampleRate = 44100;
 
+	int _srcQuality = SRC_SINC_BEST_QUALITY;
+	
 	/**
 	 The struct used to resample audio data before transmitting to clients
 	 */
@@ -134,6 +143,10 @@ private:
 		return _getTimestampLength();
 	}
 	
+	int _getDataLengthIndex() {
+		return _getTimestampLength() + _getDTypeLength();
+	}
+	
 	/**
 	 Returns the first index in buffer at which PCM data starts
 	 */
@@ -146,13 +159,24 @@ private:
 	 */
 	int _getHeaderSize() {
 		// "sizeof timestamp" plus "sizeof data type"
-		return sizeof(double) + sizeof(double);
+		return (_getTimestampLength() + _getDTypeLength() + _getDataLengthLength()) * sizeof(T);
 	}
 	
 	/**
 	 Returns the length (in number of T) of the timestamp. E.g. for T=float32, this will return 2
 	 */
 	int _getTimestampLength() {
+		return sizeof(double) / sizeof(T);
+	}
+	
+	/**
+	 Returns the length (in number of T) of the DType. E.g. for T=float32, this will return 2
+	 */
+	int _getDTypeLength() {
+		return sizeof(double) / sizeof(T);
+	}
+	
+	int _getDataLengthLength() {
 		return sizeof(double) / sizeof(T);
 	}
 	
@@ -181,27 +205,27 @@ private:
 	void _updateInternals(int nChans) {
 		_updateRequired = false;
 		
-		if (inputSampleRate != outputSampleRate() || nChannels != nChans) {
+		if (inputSampleRate != getOutputSampleRate() || nChannels != nChans) {
 			_srcMtx.lock();
 			// delete the old src if exists, init new
 			if (_src != nullptr) src_delete(_src);
 			
 			// initialize the sample rate converter
 			int* error = new int;
-			_src = src_new(SRC_SINC_BEST_QUALITY, nChans, error);
+			_src = src_new(_srcQuality, nChans, error);
 			if (*error != 0) _outputSampleRate = inputSampleRate;
 			
 			_srcMtx.unlock();
 				
 			_doResample = *error == 0;
-			_srcData.src_ratio = outputSampleRate() / (double) inputSampleRate;
+			_srcData.src_ratio = getOutputSampleRate() / (double) inputSampleRate;
 			nChannels = nChans;
 			delete error;
 		} else {
 			_doResample = false;
 		}
 		
-		_onReadyCb(outputSampleRate(), nChannels, bitDepth());
+		_onReadyCb(getOutputSampleRate(), nChannels, bitDepth());
 	}
 	
 	int resampleData(int nSamplesToResample, float *sourceBuffer) {
@@ -220,23 +244,26 @@ private:
 		return _srcData.output_frames_gen * nChannels;
 	}
 	
-	int copyToUploadBuffer(int startIndex, int nSamplesToCopy, float *sourceBuffer) {
+	int _writeToUploadBuffer(int nSamples, float *buffToCopy) {
 		// copy resampled data into the upload buffer
-		for (int j = 0; j < nSamplesToCopy; j++) {
-			_uploadBuffer[j + startIndex] = (sourceBuffer[j] > 1) ? _dTypeMultiplier() : sourceBuffer[j] * _dTypeMultiplier();
+		for (int j = 0; j < nSamples; j++) {
+			_uploadBuffer[j + _getBodyIndex()] = (buffToCopy[j] > 1) ? _dTypeMultiplier() : buffToCopy[j] * _dTypeMultiplier();
 		}
-		
-		return nSamplesToCopy * sizeof(T) + _getHeaderSize();
 	}
+
+	
 	
 public:
 	
-	TypedUploadBuffer(std::function<void(T*, size_t)> submitFunc, std::function<void(int, int, int)> onReadyCb, int sampleR)
-	: UploadBuffer(onReadyCb, sampleR) {
+	TypedUploadBuffer(std::function<void(T*, size_t)> submitFunc, std::function<void(int, int, int)> onReadyCb, int inSampleR, int outSampleR = 0, int srcQuality = 0)
+	: UploadBuffer(onReadyCb, inSampleR) {
 		_submitFunc = submitFunc;
-		
+				
 		_srcData.end_of_input = 0;
 		_srcData.data_out = _resampleOut;
+		
+		if (outSampleR != 0) setOutputSampleRate(outSampleR);
+		if (srcQuality != 0) setSrcQuality(srcQuality);
 	}
 	
 	~TypedUploadBuffer() {
@@ -247,18 +274,33 @@ public:
 		return sizeof(T) * 8;
 	}
 	
-	int outputSampleRate() {
+	int getOutputSampleRate() {
 		return _outputSampleRate;
 	}
 	
 	void setInputSampleRate(int sampleRate) {
-		// the structure of this looks silly but is deliberate to account for race conditions
 		if (inputSampleRate != sampleRate) {
 			inputSampleRate = sampleRate;
 			_updateRequired = true;
 		}
-		
-		inputSampleRate = sampleRate;
+	}
+	
+	void setOutputSampleRate(int sampleRate) {
+		if (getOutputSampleRate() != sampleRate) {
+			_outputSampleRate = sampleRate;
+			_updateRequired = true;
+		}
+	}
+	
+	void setSrcQuality(int quality) {
+		if (_srcQuality != quality) {
+			_srcQuality = quality;
+			_updateRequired = true;
+		}
+	}
+	
+	int getSrcQuality() {
+		return _srcQuality;
 	}
 	
 	void processBlock(iplug::sample** inputs, int nFrames, int nChans) {
@@ -300,29 +342,36 @@ public:
 		bool  *isSilent      = (_swap) ? &_swapBuffer1Silent : &_swapBuffer2Silent;
 		float *buffer        = (_swap) ? _swapBuffer1        : _swapBuffer2;
 		int nSamples = *relevantIndex;
+		bool bufferIsSilent = *isSilent;
 		*relevantIndex = 0;
+		*isSilent = true;
 		
-		// if the buffer is all zeroes, or nothing was written, don't bother resampling and uploading
-		if (nSamples == 0 || *isSilent == true) {
+		// if the buffer is all zeroes, don't bother resampling and uploading
+		if (nSamples == 0) {
 			_bufferSwapMtx.unlock();
 			return;
 		}
-		
-		*isSilent = true;
 		
 		_bufferSwapMtx.unlock();
 		
 		_srcMtx.lock();
 		int nOutputSamples = (_doResample) ? resampleData(nSamples, buffer) : nSamples;
 		float *buffToCopy  = (_doResample) ? _resampleOut : buffer;
-		int dataToTransmit = copyToUploadBuffer(_getBodyIndex(), nOutputSamples, buffToCopy);
+		_writeToUploadBuffer(nOutputSamples, buffToCopy);
+		
 		_srcMtx.unlock();
+		
+		int dataToTransmit = (bufferIsSilent) ? _getHeaderSize() : nOutputSamples * sizeof(T) + _getHeaderSize();
 
 		// add headers
 		double* timestampPtr = (double*) &_uploadBuffer[0];
-		double* dtypePtr = (double*) &_uploadBuffer[_getDTypeIndex()];
 		*timestampPtr = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
-		*dtypePtr = _getDTypeBufferVal();
+		
+		double* dtypePtr = (double*) &_uploadBuffer[_getDTypeIndex()];
+		*dtypePtr = (bufferIsSilent) ? DTYPE_SILENCE : _getDTypeBufferVal();
+		
+		double* lengthPtr = (double*) &_uploadBuffer[_getDataLengthIndex()];
+		*lengthPtr = nOutputSamples;
 
 		_submitFunc(_uploadBuffer, dataToTransmit);
 	}
