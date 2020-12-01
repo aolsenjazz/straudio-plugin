@@ -169,18 +169,15 @@ void Straudio::setOutputSampleRate(int enumSrValue) {
 	
 	switch (enumSrValue) {
 		case 0:
-			sr = 40000;
-			break;
-		case 1:
 			sr = 44100;
 			break;
-		case 2:
+		case 1:
 			sr = 48000;
 			break;
-		case 3:
+		case 2:
 			sr = 88200;
 			break;
-		case 4:
+		case 3:
 			sr = 96000;
 			break;
 		default:

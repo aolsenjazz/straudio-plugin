@@ -230,7 +230,7 @@ private:
 	
 	int resampleData(int nSamplesToResample, float *sourceBuffer) {
 		_srcData.input_frames = nSamplesToResample / nChannels;
-		_srcData.output_frames = nSamplesToResample / nChannels;
+		_srcData.output_frames = BUFFER_SIZE;
 		_srcData.data_in = sourceBuffer;
 	
 		int processError = src_process(_src, &_srcData);
