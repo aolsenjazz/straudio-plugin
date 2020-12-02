@@ -203,6 +203,7 @@ void Straudio::sendData(T* data, size_t size) {
 	wsm->sendData(data, size);
 }
 
+// TODO: I'm pretty sure that there's a string-equiv type process to use prebaked params
 void Straudio::setRoomStatusMessage(std::string msg) {
 	roomMsg.reset(new std::string(msg));
 

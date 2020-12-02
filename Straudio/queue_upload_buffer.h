@@ -95,12 +95,26 @@ private:
 		return 1;
 	}
 	
-	int _writeToUploadBuffer(int nSamples, float *buffToCopy) {
+	// Copies resample buffer data to upload buffer, transforming to INT16 if necessary
+	void _copyResampleToUploadBuffer(int nSamples, float *buffToCopy) {
 		for (int j = 0; j < nSamples; j++) {
 			_uploadBuffer[j + _getBodyIndex()] = (buffToCopy[j] > 1) ? _dTypeMultiplier() : buffToCopy[j] * _dTypeMultiplier();
 		}
 	}
 	
+	// Write meta information about the audio data to the front of every message.
+	void _writeHeaders(int nOutputSamples, int dType) {
+		double* timestampPtr = (double*) &_uploadBuffer[0];
+		*timestampPtr = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
+
+		double* dtypePtr = (double*) &_uploadBuffer[_getDTypeIndex()];
+		*dtypePtr = dType;
+
+		double* lengthPtr = (double*) &_uploadBuffer[_getDataLengthIndex()];
+		*lengthPtr = nOutputSamples;
+	}
+	
+	// Work function executed by the upload thread, which is created in constructor.
 	void _uploadLoop() {
 		while (_doUpload) {
 			// wait until data becomes available
@@ -120,29 +134,17 @@ private:
 			}
 			
 			// pull data from the buffer
-			int nSamples = _buffer.dataAvailable();
-			float data[nSamples];
-			_buffer.read(data, nSamples);
+			int nReadableSamples = _buffer.getNReadableSamples();
+			float data[nReadableSamples];
+			bool hasSound = _buffer.read(data, nReadableSamples);
 			
-			// resample
-			int nOutputSamples = _resampler.resample(_resampleOut, data, nSamples);
+			int nOutputSamples = _resampler.resample(_resampleOut, data, nReadableSamples);
+			int dType =          (hasSound) ? _getDTypeBufferVal() : DTYPE_SILENCE;
+			int dataToTransmit = (hasSound) ? nOutputSamples * sizeof(T) + _getHeaderSize() : _getHeaderSize();
 			
-			// TODO: if silent, handle appropriately
-			_writeToUploadBuffer(nOutputSamples, _resampleOut);
+			if (hasSound) _copyResampleToUploadBuffer(nOutputSamples, _resampleOut);
+			_writeHeaders(nOutputSamples, dType);
 			
-			int dataToTransmit = nOutputSamples * sizeof(T) + _getHeaderSize();
-			
-			// add headers
-			double* timestampPtr = (double*) &_uploadBuffer[0];
-			*timestampPtr = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
-
-			double* dtypePtr = (double*) &_uploadBuffer[_getDTypeIndex()];
-			*dtypePtr = _getDTypeBufferVal();
-	//		*dtypePtr = (bufferIsSilent) ? DTYPE_SILENCE : _getDTypeBufferVal();
-
-			double* lengthPtr = (double*) &_uploadBuffer[_getDataLengthIndex()];
-			*lengthPtr = nOutputSamples;
-
 			_submitFunc(_uploadBuffer, dataToTransmit);
 			
 			shutdownMtx.unlock();
@@ -152,7 +154,7 @@ private:
 public:
 	
 	TypedUploadBuffer(std::function<void(T*, size_t)> submitFunc, std::function<void(int, int, int)> onReadyCb, int inSampleR, int outSampleR = 0, int srcQuality = 0)
-	: UploadBuffer(onReadyCb, inSampleR) {
+	: UploadBuffer(onReadyCb, inSampleR), _buffer(BUFFER_SIZE) {
 		_submitFunc = submitFunc;
 		
 		if (outSampleR != 0) setOutputSampleRate(outSampleR);

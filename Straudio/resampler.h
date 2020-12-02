@@ -1,20 +1,3 @@
-/**
- Custom buffers for sending PCM data to each client. Reuses the same buffer _buffer<T> to avoid uncessary allocation of memory.
- Each buffer contains a header consisting of metadata related to the PCM, and a body consisting of PCM data. Each message
- is structured as such:
- 
- __________________
- | 8 bytes timestamp| ms since epoch
- |_________________|
- | 8 bytes dtype        | DTYPE_INT16, DTYPE_FLOAT32, or SILENCE
- |_________________|
- | 8 bytes length       | number of samples in the body. only used to instruct clients how many samples of silence to write
- |_________________|
- |0-8192 bytes PCM|
- |_________________|
- 
- */
-
 #pragma once
 
 class Resampler {
@@ -47,6 +30,7 @@ public:
 		src_delete(_src);
 	}
 	
+	// Should be called whenever the quality, sample rates, or nChannels changes
 	void update(int inSr, int outSr, int nChans, int quality) {
 		// delete the old src if exists, init new
 		if (_src != nullptr) src_delete(_src);
@@ -68,6 +52,7 @@ public:
 		_srcQuality = quality;
 	}
 	
+	// Resamples audio data of length readLength, writing it to write buffer. Returns the amount of data written
 	int resample(float* writeBuffer, float* readBuffer, int readLength) {
 		if (_inputSampleRate == _outputSampleRate) {
 			// input and output sample rates are the same. just copy the buffer
