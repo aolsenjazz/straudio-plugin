@@ -8,35 +8,32 @@ class UploadBuffer {
 protected:
 	
 	std::function<void(int, int, int)> _onReadyCb;
-	
-	/**
-	 The internal sample rate of the DAW. Potentially different from the _outputSampleRate.
-	 */
-	int inputSampleRate = 0;
+	int _inputSampleRate;
 	
 public:
-
-	int nChannels = 0;
 	
 	/**
 	 nChannels and batchSize probably aren't known when this object is constructed, so these will probably be set in a later processBlock()
 	 or updateSettings().
 	 */
 	UploadBuffer(std::function<void(int, int, int)> onReadyCb, int sampleR) {
+		_inputSampleRate = sampleR;
 		_onReadyCb = onReadyCb;
-		inputSampleRate = sampleR;
 	}
 	
-	virtual ~UploadBuffer() {
-
-	}
+	virtual ~UploadBuffer() {}
 	
-	virtual void processBlock(iplug::sample** inputs, int nFrames, int nChans) = 0;
-	virtual int bitDepth() = 0;
+	// getters
+	virtual int getBitDepth() = 0;
 	virtual int getOutputSampleRate() = 0;
-	virtual void upload() = 0;
+	virtual int getInputSampleRate() = 0;
+	virtual int getSrcQuality() = 0;
+	virtual int getNChannels() = 0;
+	
+	// setters
 	virtual void setInputSampleRate(int sampleRate) = 0;
 	virtual void setSrcQuality(int quality) = 0;
 	virtual void setOutputSampleRate(int sampleRate) = 0;
-	virtual int getSrcQuality() = 0;
+	
+	virtual void processBlock(iplug::sample** inputs, int nFrames, int nChans) = 0;
 };

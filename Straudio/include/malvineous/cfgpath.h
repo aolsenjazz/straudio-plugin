@@ -29,6 +29,7 @@
  *  - PATH_SEPARATOR_STRING: The same as PATH_SEPARATOR_CHAR but as a C string,
  *      to make it easier to append to other string constants.
  */
+#pragma once
 
 #ifndef CFGPATH_H_
 #define CFGPATH_H_

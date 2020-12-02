@@ -723,6 +723,12 @@
 		AFC6D27E2564988B0096B2CA /* LoginPanel.h in Headers */ = {isa = PBXBuildFile; fileRef = AFC6D27B2564988B0096B2CA /* LoginPanel.h */; };
 		AFC6D27F2564988B0096B2CA /* AudioInfoPanel.h in Headers */ = {isa = PBXBuildFile; fileRef = AFC6D27C2564988B0096B2CA /* AudioInfoPanel.h */; };
 		AFC6D2802564988B0096B2CA /* AudioInfoPanel.h in Headers */ = {isa = PBXBuildFile; fileRef = AFC6D27C2564988B0096B2CA /* AudioInfoPanel.h */; };
+		AFE14C302576F6D900688BE9 /* queue_upload_buffer.h in Headers */ = {isa = PBXBuildFile; fileRef = AFE14C2B2576F6D900688BE9 /* queue_upload_buffer.h */; };
+		AFE14C312576F6D900688BE9 /* queue_upload_buffer.h in Headers */ = {isa = PBXBuildFile; fileRef = AFE14C2B2576F6D900688BE9 /* queue_upload_buffer.h */; };
+		AFE14C3D2576F73600688BE9 /* ring_buffer.h in Headers */ = {isa = PBXBuildFile; fileRef = AFE14C3C2576F73600688BE9 /* ring_buffer.h */; };
+		AFE14C3E2576F73600688BE9 /* ring_buffer.h in Headers */ = {isa = PBXBuildFile; fileRef = AFE14C3C2576F73600688BE9 /* ring_buffer.h */; };
+		AFE14C4A2577305900688BE9 /* resampler.h in Headers */ = {isa = PBXBuildFile; fileRef = AFE14C492577305900688BE9 /* resampler.h */; };
+		AFE14C4B2577305900688BE9 /* resampler.h in Headers */ = {isa = PBXBuildFile; fileRef = AFE14C492577305900688BE9 /* resampler.h */; };
 		B885CBC52304AE7300D73128 /* IPlugProcessor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4F8F61A8202807B9003F2573 /* IPlugProcessor.cpp */; };
 		B8E22A0C220268C4007CBF4C /* IPlugVST3_ProcessorBase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B8E22A0A220268C4007CBF4C /* IPlugVST3_ProcessorBase.cpp */; };
 		B8E22A0D220268C4007CBF4C /* IPlugVST3_ProcessorBase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B8E22A0A220268C4007CBF4C /* IPlugVST3_ProcessorBase.cpp */; };
@@ -1381,6 +1387,9 @@
 		AFC6D299256498FD0096B2CA /* libnettle.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libnettle.a; path = "../../../straudio-plugin.bak/Straudio/lib/libnettle.a"; sourceTree = "<group>"; };
 		AFC6D29A256498FD0096B2CA /* libssl.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libssl.a; path = "../../../straudio-plugin.bak/Straudio/lib/libssl.a"; sourceTree = "<group>"; };
 		AFC6D29B256498FD0096B2CA /* libusrsctp.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libusrsctp.a; path = "../../../straudio-plugin.bak/Straudio/lib/libusrsctp.a"; sourceTree = "<group>"; };
+		AFE14C2B2576F6D900688BE9 /* queue_upload_buffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = queue_upload_buffer.h; path = ../queue_upload_buffer.h; sourceTree = "<group>"; };
+		AFE14C3C2576F73600688BE9 /* ring_buffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ring_buffer.h; path = ../ring_buffer.h; sourceTree = "<group>"; };
+		AFE14C492577305900688BE9 /* resampler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = resampler.h; path = ../resampler.h; sourceTree = "<group>"; };
 		B8E22A0A220268C4007CBF4C /* IPlugVST3_ProcessorBase.cpp */ = {isa = PBXFileReference; indentWidth = 2; lastKnownFileType = sourcecode.cpp.cpp; name = IPlugVST3_ProcessorBase.cpp; path = ../../../iPlug2/IPlug/VST3/IPlugVST3_ProcessorBase.cpp; sourceTree = "<group>"; tabWidth = 2; };
 		B8E22A0B220268C4007CBF4C /* IPlugVST3_ProcessorBase.h */ = {isa = PBXFileReference; indentWidth = 2; lastKnownFileType = sourcecode.c.h; name = IPlugVST3_ProcessorBase.h; path = ../../../iPlug2/IPlug/VST3/IPlugVST3_ProcessorBase.h; sourceTree = "<group>"; tabWidth = 2; };
 		B8EA6B932203868500D23A86 /* IPlugVST3_Common.h */ = {isa = PBXFileReference; indentWidth = 2; lastKnownFileType = sourcecode.c.h; name = IPlugVST3_Common.h; path = ../../../iPlug2/IPlug/VST3/IPlugVST3_Common.h; sourceTree = "<group>"; tabWidth = 2; };
@@ -1574,6 +1583,9 @@
 				AFAD4616256495FE00EBB24D /* logger_init.h */,
 				AFAD4619256495FE00EBB24D /* peer_connection_manager.h */,
 				AFAD461B256495FF00EBB24D /* preferences.h */,
+				AFE14C2B2576F6D900688BE9 /* queue_upload_buffer.h */,
+				AFE14C492577305900688BE9 /* resampler.h */,
+				AFE14C3C2576F73600688BE9 /* ring_buffer.h */,
 				AFAD4615256495FE00EBB24D /* shared_config.h */,
 				AFAD4612256495FE00EBB24D /* Straudio.cpp */,
 				AFAD461D256495FF00EBB24D /* Straudio.h */,
@@ -2765,8 +2777,10 @@
 				AF59265E25649C3000FC7825 /* IXWebSocketProxyServer.h in Headers */,
 				AF59268825649C3000FC7825 /* IXSelectInterruptFactory.h in Headers */,
 				AF59266825649C3000FC7825 /* IXWebSocketOpenInfo.h in Headers */,
+				AFE14C3E2576F73600688BE9 /* ring_buffer.h in Headers */,
 				AF59264A25649C3000FC7825 /* IXWebSocketPerMessageDeflate.h in Headers */,
 				AF5926A025649C3000FC7825 /* cfgpath.h in Headers */,
+				AFE14C4B2577305900688BE9 /* resampler.h in Headers */,
 				AF59279B25649C3A00FC7825 /* exceptions.hpp in Headers */,
 				AF59277F25649C3A00FC7825 /* json_sax.hpp in Headers */,
 				AF59273425649C3900FC7825 /* RollingFileAppender.h in Headers */,
@@ -2827,6 +2841,7 @@
 				AF59265A25649C3000FC7825 /* IXCancellationRequest.h in Headers */,
 				AFAD463B256495FF00EBB24D /* domain.h in Headers */,
 				AF5927A725649C3A00FC7825 /* internal_iterator.hpp in Headers */,
+				AFE14C312576F6D900688BE9 /* queue_upload_buffer.h in Headers */,
 				AF59273825649C3900FC7825 /* IAppender.h in Headers */,
 				AF59277925649C3A00FC7825 /* value_t.hpp in Headers */,
 				AF59276525649C3900FC7825 /* peerconnection.hpp in Headers */,
@@ -2952,6 +2967,7 @@
 				4F03A5AA20A4621100EBDFFB /* IGraphicsLiveEdit.h in Headers */,
 				AF59272525649C3900FC7825 /* MessageOnlyFormatter.h in Headers */,
 				AFAD463E256495FF00EBB24D /* peer_connection_manager.h in Headers */,
+				AFE14C4A2577305900688BE9 /* resampler.h in Headers */,
 				AF59279025649C3A00FC7825 /* type_traits.hpp in Headers */,
 				AF59265925649C3000FC7825 /* IXCancellationRequest.h in Headers */,
 				AF59271925649C3900FC7825 /* Record.h in Headers */,
@@ -2968,6 +2984,7 @@
 				AF59267925649C3000FC7825 /* IXWebSocketHttpHeaders.h in Headers */,
 				AF59269525649C3000FC7825 /* src_config.h in Headers */,
 				AF59265125649C3000FC7825 /* IXUtf8Validator.h in Headers */,
+				AFE14C3D2576F73600688BE9 /* ring_buffer.h in Headers */,
 				AF59266B25649C3000FC7825 /* IXWebSocketTransport.h in Headers */,
 				AF59279C25649C3A00FC7825 /* macro_unscope.hpp in Headers */,
 				AF59279425649C3A00FC7825 /* detected.hpp in Headers */,
@@ -2977,6 +2994,7 @@
 				AF59276625649C3900FC7825 /* log.hpp in Headers */,
 				AF5927A625649C3A00FC7825 /* internal_iterator.hpp in Headers */,
 				4F03A5D520A4621100EBDFFB /* IGraphicsConstants.h in Headers */,
+				AFE14C302576F6D900688BE9 /* queue_upload_buffer.h in Headers */,
 				AF59279825649C3A00FC7825 /* json_pointer.hpp in Headers */,
 				4FF3205820B2BFAB00269268 /* IPlugPaths.h in Headers */,
 				AFAD463C256495FF00EBB24D /* http_client.h in Headers */,

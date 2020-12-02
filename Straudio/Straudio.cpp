@@ -9,7 +9,7 @@
 #include "ui/AudioInfoPanel.h"
 #include "web_services_manager.h"
 #include "audio_propagator.h"
-#include "idle_upload_buffer.h"
+#include "queue_upload_buffer.h"
 
 #include "libsamplerate/src_config.h"
 
@@ -67,9 +67,7 @@ void Straudio::OnUIClose() {
 }
 
 void Straudio::OnIdle() {
-	if (uploadBuffer != nullptr && !room->isEmpty()) {
-		uploadBuffer->upload();
-	}
+
 }
 
 void Straudio::OnActivate(bool active) {
@@ -107,7 +105,7 @@ void Straudio::signalStateChange() {
 	PLOG_DEBUG << "Connection state change. State: " << *signalState;
 
 	if (*signalState == "open") {
-		wsm->ss->createRoom(uploadBuffer->getOutputSampleRate(), uploadBuffer->nChannels, uploadBuffer->bitDepth());
+		wsm->ss->createRoom(uploadBuffer->getOutputSampleRate(), uploadBuffer->getNChannels(), uploadBuffer->getBitDepth());
 	} else {
 		wsm->closePeerConnections(); // something happened with the connection. close peer connections
 		setRoomStatusMessage("Disconnected...");
