@@ -50,7 +50,7 @@ private:
 	int _nChannels = 0;
 	int _outputSampleRate = 44100;
 	int _srcQuality = SRC_SINC_BEST_QUALITY;
-	int _nSilentSamples;
+	long _nSilentSamples = 0;
 	
 	// Locks for the audio upload thread
 	std::mutex mtx;
