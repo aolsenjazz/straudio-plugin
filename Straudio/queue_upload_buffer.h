@@ -39,7 +39,7 @@ private:
 	static constexpr int BUFFER_SIZE = 32768;
 
 	// If the sample rate or nChans changes, tell the src it needs to update
-	bool _updateRequired = false;	
+	bool _updateRequired = true;
 	
 	// True while program is alive. Tells the upload thread when to shut down
 	bool _doUpload = true;
@@ -164,7 +164,7 @@ private:
 			}
 			
 			int nOutputSamples = _resampler.resample(_resampleOut, data, nReadableSamples);
-			int dType =          (hasSound) ? _getDTypeBufferVal() : DTYPE_SILENCE;
+			int dType          = (hasSound) ? _getDTypeBufferVal() : DTYPE_SILENCE;
 			int dataToTransmit = (hasSound) ? nOutputSamples * sizeof(T) + _getHeaderSize() : _getHeaderSize();
 			
 			if (hasSound) _copyResampleToUploadBuffer(nOutputSamples, _resampleOut);

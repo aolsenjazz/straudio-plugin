@@ -639,8 +639,6 @@
 		AFAD463D256495FF00EBB24D /* http_client.h in Headers */ = {isa = PBXBuildFile; fileRef = AFAD4618256495FE00EBB24D /* http_client.h */; };
 		AFAD463E256495FF00EBB24D /* peer_connection_manager.h in Headers */ = {isa = PBXBuildFile; fileRef = AFAD4619256495FE00EBB24D /* peer_connection_manager.h */; };
 		AFAD463F256495FF00EBB24D /* peer_connection_manager.h in Headers */ = {isa = PBXBuildFile; fileRef = AFAD4619256495FE00EBB24D /* peer_connection_manager.h */; };
-		AFAD4640256495FF00EBB24D /* idle_upload_buffer.h in Headers */ = {isa = PBXBuildFile; fileRef = AFAD461A256495FF00EBB24D /* idle_upload_buffer.h */; };
-		AFAD4641256495FF00EBB24D /* idle_upload_buffer.h in Headers */ = {isa = PBXBuildFile; fileRef = AFAD461A256495FF00EBB24D /* idle_upload_buffer.h */; };
 		AFAD4642256495FF00EBB24D /* preferences.h in Headers */ = {isa = PBXBuildFile; fileRef = AFAD461B256495FF00EBB24D /* preferences.h */; };
 		AFAD4643256495FF00EBB24D /* preferences.h in Headers */ = {isa = PBXBuildFile; fileRef = AFAD461B256495FF00EBB24D /* preferences.h */; };
 		AFAD4644256495FF00EBB24D /* audio_propagator.h in Headers */ = {isa = PBXBuildFile; fileRef = AFAD461C256495FF00EBB24D /* audio_propagator.h */; };
@@ -1366,7 +1364,6 @@
 		AFAD4617256495FE00EBB24D /* domain.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = domain.h; path = ../domain.h; sourceTree = "<group>"; };
 		AFAD4618256495FE00EBB24D /* http_client.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = http_client.h; path = ../http_client.h; sourceTree = "<group>"; };
 		AFAD4619256495FE00EBB24D /* peer_connection_manager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = peer_connection_manager.h; path = ../peer_connection_manager.h; sourceTree = "<group>"; };
-		AFAD461A256495FF00EBB24D /* idle_upload_buffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = idle_upload_buffer.h; path = ../idle_upload_buffer.h; sourceTree = "<group>"; };
 		AFAD461B256495FF00EBB24D /* preferences.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = preferences.h; path = ../preferences.h; sourceTree = "<group>"; };
 		AFAD461C256495FF00EBB24D /* audio_propagator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = audio_propagator.h; path = ../audio_propagator.h; sourceTree = "<group>"; };
 		AFAD461D256495FF00EBB24D /* Straudio.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Straudio.h; path = ../Straudio.h; sourceTree = "<group>"; };
@@ -1577,7 +1574,6 @@
 				52FBBED30D0CF143001C8B8A /* config.h */,
 				AFAD4617256495FE00EBB24D /* domain.h */,
 				AFAD4618256495FE00EBB24D /* http_client.h */,
-				AFAD461A256495FF00EBB24D /* idle_upload_buffer.h */,
 				AFAD4614256495FE00EBB24D /* interval_executor.h */,
 				AFAD460F256495FD00EBB24D /* ix_signal_service.h */,
 				AFAD4616256495FE00EBB24D /* logger_init.h */,
@@ -2817,7 +2813,6 @@
 				AF5927A925649C3A00FC7825 /* primitive_iterator.hpp in Headers */,
 				AF59275F25649C3900FC7825 /* rtc.h in Headers */,
 				AF59269425649C3000FC7825 /* IXUrlParser.h in Headers */,
-				AFAD4641256495FF00EBB24D /* idle_upload_buffer.h in Headers */,
 				AFAD463F256495FF00EBB24D /* peer_connection_manager.h in Headers */,
 				AF59266425649C3000FC7825 /* IXExponentialBackoff.h in Headers */,
 				AF59272425649C3900FC7825 /* CsvFormatter.h in Headers */,
@@ -2961,7 +2956,6 @@
 				AF59271D25649C3900FC7825 /* UTF8Converter.h in Headers */,
 				AFAD4642256495FF00EBB24D /* preferences.h in Headers */,
 				AFAD4634256495FF00EBB24D /* interval_executor.h in Headers */,
-				AFAD4640256495FF00EBB24D /* idle_upload_buffer.h in Headers */,
 				AF59263B25649C3000FC7825 /* IXWebSocketMessage.h in Headers */,
 				AF59271F25649C3900FC7825 /* FuncMessageFormatter.h in Headers */,
 				4F03A5AA20A4621100EBDFFB /* IGraphicsLiveEdit.h in Headers */,
