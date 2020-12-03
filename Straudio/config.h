@@ -1,7 +1,7 @@
 #define PLUG_NAME "Straudio"
 #define PLUG_MFR "Alexander Olsen"
-#define PLUG_VERSION_HEX 0x00000010
-#define PLUG_VERSION_STR "0.1.0"
+#define PLUG_VERSION_HEX 0x0000102
+#define PLUG_VERSION_STR "0.1.2"
 #define PLUG_UNIQUE_ID 'Nvem'
 #define PLUG_MFR_ID 'Aofx'
 #define PLUG_URL_STR "https://straud.io"
@@ -15,7 +15,7 @@
 
 #define SHARED_RESOURCES_SUBPATH "Straudio"
 
-#define PLUG_CHANNEL_IO "1-1 2-2"
+#define PLUG_CHANNEL_IO "1-1 1-2 2-2"
 
 #define PLUG_LATENCY 0
 #define PLUG_TYPE 0

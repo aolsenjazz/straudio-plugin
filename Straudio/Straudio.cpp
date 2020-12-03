@@ -133,13 +133,16 @@ void Straudio::onBufferReady(int sampleRate, int nChans, int bitDepth) {
 }
 
 void Straudio::ProcessBlock(iplug::sample** inputs, iplug::sample** outputs, int nFrames) {
-    const int nChans = NOutChansConnected();
+    const int nOutChans = NOutChansConnected();
+	const int nInChans = NInChansConnected();
+	
+	
 
-	if (GetParam(kMonitor)->Bool()) AudioPropagator::propagateAudio(inputs, outputs, nFrames, nChans);
-	else AudioPropagator::propagateSilence(outputs, nFrames, nChans);
+	if (GetParam(kMonitor)->Bool()) AudioPropagator::propagateAudio(inputs, outputs, nFrames, nInChans, nOutChans);
+	else AudioPropagator::propagateSilence(outputs, nFrames, nOutChans);
 
 	if (!room->isEmpty()) {
-		uploadBuffer->processBlock(inputs, nFrames, nChans);
+		uploadBuffer->processBlock(inputs, nFrames, nOutChans);
 	}
 }
 
