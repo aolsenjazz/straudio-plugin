@@ -4,20 +4,14 @@
 class RingBuffer {
 
 private:
-	int _bufferLength = 0;
+	static constexpr int BUFFER_LENGTH = 32768;
 	
-	std::mutex _mtx;
 	int _writePos = 0;
 	int _readPos = 0;
-	float* _data;
+	float _data[BUFFER_LENGTH];
 	
 public:
-	
-	RingBuffer(int bufferLength) {
-		_bufferLength = bufferLength;
-		_data = new float[bufferLength];
-	}
-	
+
 	// returns true if data is available to be read
 	bool hasDataAvailable() {
 		return _writePos != _readPos;
@@ -32,7 +26,7 @@ public:
 	int getNReadableSamples() {
 		if (_readPos == _writePos) return 0;
 		
-		return (_readPos < _writePos) ? _writePos - _readPos : _bufferLength - _readPos + _writePos;
+		return (_readPos < _writePos) ? _writePos - _readPos : BUFFER_LENGTH - _readPos + _writePos;
 	}
 	
 	// read the specified num of samples and put into the given writeBuffer. returns false if buffer is all 0
@@ -41,7 +35,7 @@ public:
 		bool hasSound = false;
 		
 		for (int i = 0; i < numSamples; i++) {
-			if (readPos == _bufferLength) readPos = 0;
+			if (readPos == BUFFER_LENGTH) readPos = 0;
 			if (_data[readPos] != 0) hasSound = true;
 			
 			writeBuffer[i] = _data[readPos];
@@ -58,7 +52,7 @@ public:
 		
 		for (int s = 0; s < nFrames; s++) {
 			for (int c = 0; c < nChans; c++) {
-				if (newWritePos == _bufferLength) newWritePos = 0;
+				if (newWritePos == BUFFER_LENGTH) newWritePos = 0;
 				
 				_data[newWritePos++] = inputs[c][s] > 1 ? 1 : inputs[c][s];
 			}

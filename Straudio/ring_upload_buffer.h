@@ -42,15 +42,13 @@ private:
 	bool _updateRequired = false;	
 	
 	// True while program is alive. Tells the upload thread when to shut down
-	bool _doUpload = true;
+	std::atomic<bool> _doUpload = true;
 	
-	// Ensures the upload thread is only started once
-	bool _uploadThreadStarted = false;
+	int nSilentSamples = 0;
 	
 	int _nChannels = 0;
 	int _outputSampleRate = 44100;
 	int _srcQuality = SRC_SINC_BEST_QUALITY;
-	int _nSilentSamples;
 	
 	// Locks for the audio upload thread
 	std::mutex mtx;
@@ -118,25 +116,13 @@ private:
 		*lengthPtr = nOutputSamples;
 	}
 	
-	/**
-	 This MUST be called from process_block. Cannot be called in constructor or lifecycle method because auvaltool kills plugins immediately
-	 after this thread is created, cause a potential race condition w/destructing this object and the thread trying to acquire a lock.
-	 */
-	void _startUploadThreadIfNecessary() {
-		if (!_uploadThreadStarted) {
-			_uploadThreadStarted = true;
-			
-			std::thread t(std::bind(&TypedUploadBuffer::_uploadLoop, this));
-			t.detach();
-		}
-	}
-	
 	// Work function executed by the upload thread, which is created in constructor.
 	void _uploadLoop() {
 		while (_doUpload) {
 			// wait until data becomes available
 			std::unique_lock<std::mutex> lock{mtx};
-			cond.wait(lock, [&] { return _buffer.hasDataAvailable() || !_doUpload; });
+			cond.wait(lock, [&] { return !_doUpload; });
+			
 			if (!_doUpload) return; // if woken up because dying, don't process audio
 			
 			shutdownMtx.lock(); // don't shut down while we're trying to resample/upload
@@ -155,13 +141,10 @@ private:
 			float data[nReadableSamples];
 			bool hasSound = _buffer.read(data, nReadableSamples);
 			
-			if (hasSound) _nSilentSamples = 0;
-			else _nSilentSamples += nReadableSamples;
+			if (hasSound) nSilentSamples = 0;
+			else nSilentSamples += nReadableSamples;
 			
-			if (_nSilentSamples >= 2 * getInputSampleRate()) {
-				shutdownMtx.unlock();
-				continue;
-			}
+			if (nSilentSamples >= getInputSampleRate()) return;
 			
 			int nOutputSamples = _resampler.resample(_resampleOut, data, nReadableSamples);
 			int dType =          (hasSound) ? _getDTypeBufferVal() : DTYPE_SILENCE;
@@ -179,11 +162,14 @@ private:
 public:
 	
 	TypedUploadBuffer(std::function<void(T*, size_t)> submitFunc, std::function<void(int, int, int)> onReadyCb, int inSampleR, int outSampleR = 0, int srcQuality = 0)
-	: UploadBuffer(onReadyCb, inSampleR) {
+	: UploadBuffer(onReadyCb, inSampleR), _buffer(BUFFER_SIZE) {
 		_submitFunc = submitFunc;
 		
 		if (outSampleR != 0) setOutputSampleRate(outSampleR);
 		if (srcQuality != 0) setSrcQuality(srcQuality);
+		
+		std::thread t(std::bind(&TypedUploadBuffer::_uploadLoop, this));
+		t.detach();
 	}
 	
 	~TypedUploadBuffer() {
@@ -198,8 +184,6 @@ public:
 			_nChannels = nChans;
 			_onReadyCb(getOutputSampleRate(), _nChannels, getBitDepth());
 		}
-		
-		_startUploadThreadIfNecessary(); // ridiculous placement. see method docstring for more
 	
 		_buffer.write(inputs, nFrames, nChans);
 		cond.notify_all();
