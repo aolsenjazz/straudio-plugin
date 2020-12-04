@@ -1,10 +1,12 @@
 /**
- Circular buffer that allows for reasonably safe concurrent access.
+ Circular buffer that allows for reasonably safe concurrent access. The number of input channels can be 0 < nInChans < nOutChans.
+ The number of output chans is hardcoded to 2.
  */
 class RingBuffer {
 
 private:
 	static constexpr int BUFFER_LENGTH = 32768;
+	static constexpr int N_CHANNELS = 2;
 	
 	int _writePos = 0;
 	int _readPos = 0;
@@ -47,14 +49,25 @@ public:
 	}
 	
 	// write the given number of samples where samples == nFrames * nChans
-	void write(double** inputs, int nFrames, int nChans) {
+	void write(double** inputs, int nFrames, int nInChans) {
 		int newWritePos = _writePos;
 		
-		for (int s = 0; s < nFrames; s++) {
-			for (int c = 0; c < nChans; c++) {
-				if (newWritePos == BUFFER_LENGTH) newWritePos = 0;
-				
-				_data[newWritePos++] = inputs[c][s] > 1 ? 1 : inputs[c][s];
+		if (nInChans == 1) {
+			// copy the input channel to both outs
+			for (int s = 0; s < nFrames; s++) {
+				for (int c = 0; c < N_CHANNELS; c++) {
+					if (newWritePos == BUFFER_LENGTH) newWritePos = 0;
+					
+					_data[newWritePos++] = inputs[c][s] > 1 ? 1 : inputs[0][s];
+				}
+			}
+		} else {
+			for (int s = 0; s < nFrames; s++) {
+				for (int c = 0; c < N_CHANNELS; c++) {
+					if (newWritePos == BUFFER_LENGTH) newWritePos = 0;
+					
+					_data[newWritePos++] = inputs[c][s] > 1 ? 1 : inputs[c][s];
+				}
 			}
 		}
 		

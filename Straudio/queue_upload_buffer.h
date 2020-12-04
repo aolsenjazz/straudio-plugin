@@ -38,7 +38,7 @@ private:
 	// 32768 is completely arbitrary
 	static constexpr int BUFFER_SIZE = 32768;
 
-	// If the sample rate or nChans changes, tell the src it needs to update
+	// If the sample rate changes, tell the src it needs to update
 	bool _updateRequired = true;
 	
 	// True while program is alive. Tells the upload thread when to shut down
@@ -47,7 +47,6 @@ private:
 	// Ensures the upload thread is only started once
 	bool _uploadThreadStarted = false;
 	
-	int _nChannels = 0;
 	int _outputSampleRate = 44100;
 	int _srcQuality = SRC_SINC_BEST_QUALITY;
 	long _nSilentSamples = 0;
@@ -143,8 +142,8 @@ private:
 			
 			if (_updateRequired) {
 				_updateRequired = false;
-				_resampler.update(getInputSampleRate(), _outputSampleRate, _nChannels, _srcQuality);
-				_onReadyCb(getOutputSampleRate(), getNChannels(), getBitDepth());
+				_resampler.update(getInputSampleRate(), _outputSampleRate, _srcQuality);
+				_onReadyCb(getOutputSampleRate(), getBitDepth());
 				_buffer.resetReadPosition();
 				shutdownMtx.unlock();
 				continue;
@@ -178,7 +177,7 @@ private:
 	
 public:
 	
-	TypedUploadBuffer(std::function<void(T*, size_t)> submitFunc, std::function<void(int, int, int)> onReadyCb, int inSampleR, int outSampleR = 0, int srcQuality = 0)
+	TypedUploadBuffer(std::function<void(T*, size_t)> submitFunc, std::function<void(int, int)> onReadyCb, int inSampleR, int outSampleR = 0, int srcQuality = 0)
 	: UploadBuffer(onReadyCb, inSampleR) {
 		_submitFunc = submitFunc;
 		
@@ -193,15 +192,10 @@ public:
 		shutdownMtx.unlock();
 	}
 	
-	void processBlock(iplug::sample** inputs, int nFrames, int nChans) {
-		if (_nChannels != nChans) {
-			_nChannels = nChans;
-			_onReadyCb(getOutputSampleRate(), _nChannels, getBitDepth());
-		}
-		
+	void processBlock(iplug::sample** inputs, int nFrames, int nInChans) {
 		_startUploadThreadIfNecessary(); // ridiculous placement. see method docstring for more
 	
-		_buffer.write(inputs, nFrames, nChans);
+		_buffer.write(inputs, nFrames, nInChans);
 		cond.notify_all();
 	}
 	
@@ -210,7 +204,6 @@ public:
 	int getOutputSampleRate() { return _outputSampleRate; }
 	int getInputSampleRate() { return _inputSampleRate; }
 	int getSrcQuality() { return _srcQuality; }
-	int getNChannels() { return _nChannels; }
 	
 	// setters
 	void setInputSampleRate(int sampleRate) {

@@ -69,8 +69,8 @@ public:
 		ss->notifyBufferReset();
 	}
 	
-	void updateAudioSettings(int sampleRate, int nChannels, int bitDepth) {
-		ss->updateAudioSettings(sampleRate, nChannels, bitDepth);
+	void updateAudioSettings(int sampleRate, int bitDepth) {
+		ss->updateAudioSettings(sampleRate, bitDepth);
 	}
 	
 	void closeRtcConnection(std::string clientId) {

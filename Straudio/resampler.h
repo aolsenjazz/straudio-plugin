@@ -4,10 +4,11 @@ class Resampler {
 	
 private:
 	
+	static constexpr int N_CHANNELS = 2;
+	
 	int _inputSampleRate;
 	int _outputSampleRate;
 	int _srcQuality;
-	int _nChannels;
 	
 	/**
 	 The struct passed to src_process(...)
@@ -30,14 +31,14 @@ public:
 		src_delete(_src);
 	}
 	
-	// Should be called whenever the quality, sample rates, or nChannels changes
-	void update(int inSr, int outSr, int nChans, int quality) {
+	// Should be called whenever the quality or sample rates change
+	void update(int inSr, int outSr, int quality) {
 		// delete the old src if exists, init new
 		if (_src != nullptr) src_delete(_src);
 		
 		// initialize the sample rate converter
 		int* error = new int;
-		_src = src_new(quality, nChans, error);
+		_src = src_new(quality, N_CHANNELS, error);
 		_srcData.src_ratio = outSr / (double) inSr;
 		
 		if (*error != 0) {
@@ -48,7 +49,6 @@ public:
 		
 		_inputSampleRate = inSr;
 		_outputSampleRate = outSr;
-		_nChannels = nChans;
 		_srcQuality = quality;
 	}
 	
@@ -65,15 +65,15 @@ public:
 			// input and output sample rates differ; convert
 			_srcData.data_out = writeBuffer;
 			_srcData.data_in = readBuffer;
-			_srcData.input_frames = readLength / _nChannels;
-			_srcData.output_frames = readLength / _nChannels;
+			_srcData.input_frames = readLength / N_CHANNELS;
+			_srcData.output_frames = readLength / N_CHANNELS;
 		
 			int processError = src_process(_src, &_srcData);
 			if (processError != 0) {
 				PLOG_ERROR << processError << std::endl; // this should never happen
 			}
 			
-			return _srcData.output_frames_gen * _nChannels;
+			return _srcData.output_frames_gen * N_CHANNELS;
 		}
 	}
 };

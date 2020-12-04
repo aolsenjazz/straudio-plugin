@@ -42,7 +42,7 @@ private:
 	
 	template <typename T>
 	void sendData(T* data, size_t size);
-	void onBufferReady(int sampleRate, int nChans, int bitDepth);
+	void onBufferReady(int sampleRate, int bitDepth);
 	void setSrcQuality(int enumSrcValue);
 	void setOutputSampleRate(int enumSrValue);
 	void setUploadBuffer(int enumVal);

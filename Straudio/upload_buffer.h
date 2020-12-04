@@ -7,7 +7,7 @@ class UploadBuffer {
 	
 protected:
 	
-	std::function<void(int, int, int)> _onReadyCb;
+	std::function<void(int, int)> _onReadyCb;
 	int _inputSampleRate;
 	
 public:
@@ -16,7 +16,7 @@ public:
 	 nChannels and batchSize probably aren't known when this object is constructed, so these will probably be set in a later processBlock()
 	 or updateSettings().
 	 */
-	UploadBuffer(std::function<void(int, int, int)> onReadyCb, int sampleR) {
+	UploadBuffer(std::function<void(int, int)> onReadyCb, int sampleR) {
 		_inputSampleRate = sampleR;
 		_onReadyCb = onReadyCb;
 	}
@@ -28,7 +28,6 @@ public:
 	virtual int getOutputSampleRate() = 0;
 	virtual int getInputSampleRate() = 0;
 	virtual int getSrcQuality() = 0;
-	virtual int getNChannels() = 0;
 	
 	// setters
 	virtual void setInputSampleRate(int sampleRate) = 0;

@@ -196,12 +196,11 @@ public:
 		return webSocket.getReadyState() == ix::ReadyState::Open;
 	}
 	
-	void createRoom(int sampleRate, int nChannels, int bitDepth) {
+	void createRoom(int sampleRate, int bitDepth) {
 		nlohmann::json j = {
 			{"displayName", "Host"},
 			{"method", "createRoom"},
 			{"sampleRate", sampleRate},
-			{"nChannels", nChannels},
 			{"bitDepth", bitDepth}
 		};
 		
@@ -234,10 +233,9 @@ public:
 		safeSend(j.dump());
 	}
 	
-	void updateAudioSettings(int sampleRate, int nChannels, int bitDepth) {
+	void updateAudioSettings(int sampleRate, int bitDepth) {
 		nlohmann::json j = {
 			{"sampleRate", sampleRate},
-			{"nChannels", nChannels},
 			{"bitDepth", bitDepth},
 			{"method", "audioDetails"}
 		};

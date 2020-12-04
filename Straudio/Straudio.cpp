@@ -32,7 +32,7 @@ Straudio::Straudio(const iplug::InstanceInfo& info)
 											   boundRoomStateChange, boundOnError);
 	
 	auto boundSend = std::bind(&Straudio::sendData<short>, this, _1, _2);
-	auto boundUpdateAudio = std::bind(&Straudio::onBufferReady, this, _1, _2, _3);
+	auto boundUpdateAudio = std::bind(&Straudio::onBufferReady, this, _1, _2);
 	uploadBuffer = std::make_unique<TypedUploadBuffer<short>>(boundSend, boundUpdateAudio, GetSampleRate());	
 	
 	mMakeGraphicsFunc = [&]() {
@@ -105,7 +105,7 @@ void Straudio::signalStateChange() {
 	PLOG_DEBUG << "Connection state change. State: " << *signalState;
 
 	if (*signalState == "open") {
-		wsm->ss->createRoom(uploadBuffer->getOutputSampleRate(), uploadBuffer->getNChannels(), uploadBuffer->getBitDepth());
+		wsm->ss->createRoom(uploadBuffer->getOutputSampleRate(), uploadBuffer->getBitDepth());
 	} else {
 		wsm->closePeerConnections(); // something happened with the connection. close peer connections
 		setRoomStatusMessage("Disconnected...");
@@ -125,24 +125,22 @@ void Straudio::roomStateChange() {
 	setRoomStatusMessage(msg);
 }
 
-void Straudio::onBufferReady(int sampleRate, int nChans, int bitDepth) {
+void Straudio::onBufferReady(int sampleRate, int bitDepth) {
 	if (room->state == "open" && *signalState == "open") {
 		PLOG_INFO << "Audio details changed. Updating server info...";
-		wsm->updateAudioSettings(sampleRate, nChans, bitDepth);
+		wsm->updateAudioSettings(sampleRate, bitDepth);
 	}
 }
 
 void Straudio::ProcessBlock(iplug::sample** inputs, iplug::sample** outputs, int nFrames) {
     const int nOutChans = NOutChansConnected();
 	const int nInChans = NInChansConnected();
-	
-	
 
 	if (GetParam(kMonitor)->Bool()) AudioPropagator::propagateAudio(inputs, outputs, nFrames, nInChans, nOutChans);
 	else AudioPropagator::propagateSilence(outputs, nFrames, nOutChans);
 
 	if (!room->isEmpty()) {
-		uploadBuffer->processBlock(inputs, nFrames, nOutChans);
+		uploadBuffer->processBlock(inputs, nFrames, nInChans);
 	}
 }
 
@@ -190,7 +188,7 @@ void Straudio::setOutputSampleRate(int enumSrValue) {
 }
 
 void Straudio::setUploadBuffer(int enumVal) {
-	auto boundUpdateAudio = std::bind(&Straudio::onBufferReady, this, _1, _2, _3);
+	auto boundUpdateAudio = std::bind(&Straudio::onBufferReady, this, _1, _2);
 	
 	if (enumVal == 0) {
 		auto boundSend = std::bind(&Straudio::sendData<short>, this, _1, _2);
