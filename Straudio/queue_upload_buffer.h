@@ -151,7 +151,8 @@ private:
 			
 			// pull data from the buffer
 			int nReadableSamples = _buffer.getNReadableSamples();
-			float data[nReadableSamples];
+			// TODO: FIXME ONCE WINDOWS VERSION BUILDS. THIS NEEDS TO BE A LARGE ARRAY INITIALIZED IN THE CLASS
+			float data[50000];
 			bool hasSound = _buffer.read(data, nReadableSamples);
 			
 			if (hasSound) _nSilentSamples = 0;
