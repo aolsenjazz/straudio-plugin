@@ -15,7 +15,7 @@
 *.LSOverride
 *.xcuserdata
 *.xcschememanagement.plist
-build-*
+build-win
 ipch/*
 gui/*
 
