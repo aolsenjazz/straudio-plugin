@@ -305,15 +305,8 @@
 		4FFBB93020863B0E00DDD0E7 /* fbuffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4F8158C1205D50EB00393585 /* fbuffer.cpp */; };
 		4FFBB93420863B0E00DDD0E7 /* coreiids.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4F8158E0205D50EB00393585 /* coreiids.cpp */; };
 		4FFBB93520863B0E00DDD0E7 /* vstnoteexpressiontypes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4F81588E205D50EB00393585 /* vstnoteexpressiontypes.cpp */; };
-		AF1E3CBB256D71F90024199E /* build_config.h in Sources */ = {isa = PBXBuildFile; fileRef = AF1E3CBA256D71F90024199E /* build_config.h */; };
-		AF1E3CBC256D71F90024199E /* build_config.h in Sources */ = {isa = PBXBuildFile; fileRef = AF1E3CBA256D71F90024199E /* build_config.h */; };
-		AF1E3CBD256D71F90024199E /* build_config.h in Sources */ = {isa = PBXBuildFile; fileRef = AF1E3CBA256D71F90024199E /* build_config.h */; };
-		AF1E3CBE256D71F90024199E /* build_config.h in Sources */ = {isa = PBXBuildFile; fileRef = AF1E3CBA256D71F90024199E /* build_config.h */; };
-		AF1E3CBF256D71F90024199E /* build_config.h in Sources */ = {isa = PBXBuildFile; fileRef = AF1E3CBA256D71F90024199E /* build_config.h */; };
-		AF1E3CC0256D71F90024199E /* build_config.h in Sources */ = {isa = PBXBuildFile; fileRef = AF1E3CBA256D71F90024199E /* build_config.h */; };
-		AF1E3CC1256D71F90024199E /* build_config.h in Sources */ = {isa = PBXBuildFile; fileRef = AF1E3CBA256D71F90024199E /* build_config.h */; };
-		AF1E3CC2256D71F90024199E /* build_config.h in Sources */ = {isa = PBXBuildFile; fileRef = AF1E3CBA256D71F90024199E /* build_config.h */; };
-		AF1E3CC3256D71F90024199E /* build_config.h in Sources */ = {isa = PBXBuildFile; fileRef = AF1E3CBA256D71F90024199E /* build_config.h */; };
+		AF0BC11825857B4900C7FCA0 /* build_config.h in Headers */ = {isa = PBXBuildFile; fileRef = AF0BC11725857B4800C7FCA0 /* build_config.h */; };
+		AF0BC11925857B4900C7FCA0 /* build_config.h in Headers */ = {isa = PBXBuildFile; fileRef = AF0BC11725857B4800C7FCA0 /* build_config.h */; };
 		AF39AFEA2564C5DB00D773E6 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = AF5927C825649CB100FC7825 /* libz.tbd */; };
 		AF39AFF52564C5E000D773E6 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AF5925ED25649B7700FC7825 /* Security.framework */; };
 		AF4A6A822564975200F59C98 /* libcrypto.a in Frameworks */ = {isa = PBXBuildFile; fileRef = AF4A6A812564975200F59C98 /* libcrypto.a */; };
@@ -1218,7 +1211,7 @@
 		4FFBB94120863E9300DDD0E7 /* IPlugVST3_Parameter.h */ = {isa = PBXFileReference; indentWidth = 2; lastKnownFileType = sourcecode.c.h; name = IPlugVST3_Parameter.h; path = ../../../iPlug2/IPlug/VST3/IPlugVST3_Parameter.h; sourceTree = "<group>"; tabWidth = 2; };
 		4FFF72B8214BB71400839091 /* main.rc */ = {isa = PBXFileReference; lastKnownFileType = text; name = main.rc; path = ../resources/main.rc; sourceTree = "<group>"; };
 		52FBBED30D0CF143001C8B8A /* config.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 2; lastKnownFileType = sourcecode.c.h; name = config.h; path = ../config.h; sourceTree = "<group>"; tabWidth = 2; usesTabs = 0; };
-		AF1E3CBA256D71F90024199E /* build_config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = build_config.h; sourceTree = "<group>"; };
+		AF0BC11725857B4800C7FCA0 /* build_config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = build_config.h; path = ../build_config.h; sourceTree = "<group>"; };
 		AF4A6A812564975200F59C98 /* libcrypto.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libcrypto.a; sourceTree = "<group>"; };
 		AF5925C425649A0A00FC7825 /* libsamplerate.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libsamplerate.a; path = "../../../straudio-plugin.bak/Straudio/lib/libsamplerate.a"; sourceTree = "<group>"; };
 		AF5925C525649A0A00FC7825 /* libsrtp2.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libsrtp2.a; path = "../../../straudio-plugin.bak/Straudio/lib/libsrtp2.a"; sourceTree = "<group>"; };
@@ -1570,7 +1563,7 @@
 			isa = PBXGroup;
 			children = (
 				AFAD461C256495FF00EBB24D /* audio_propagator.h */,
-				AF1E3CBA256D71F90024199E /* build_config.h */,
+				AF0BC11725857B4800C7FCA0 /* build_config.h */,
 				52FBBED30D0CF143001C8B8A /* config.h */,
 				AFAD4617256495FE00EBB24D /* domain.h */,
 				AFAD4618256495FE00EBB24D /* http_client.h */,
@@ -2819,6 +2812,7 @@
 				AF59274B25649C3900FC7825 /* websocket.hpp in Headers */,
 				AF59267425649C3000FC7825 /* IXGetFreePort.h in Headers */,
 				AF59274925649C3900FC7825 /* init.hpp in Headers */,
+				AF0BC11925857B4900C7FCA0 /* build_config.h in Headers */,
 				AF59273E25649C3900FC7825 /* RollingFileInitializer.h in Headers */,
 				AF59268625649C3000FC7825 /* IXUdpSocket.h in Headers */,
 				AF59276325649C3900FC7825 /* description.hpp in Headers */,
@@ -2895,6 +2889,7 @@
 				AF59264325649C3000FC7825 /* IXWebSocketHandshake.h in Headers */,
 				AFAD4632256495FF00EBB24D /* timeout_executor.h in Headers */,
 				AF59266F25649C3000FC7825 /* IXWebSocketMessageType.h in Headers */,
+				AF0BC11825857B4900C7FCA0 /* build_config.h in Headers */,
 				AF59269B25649C3000FC7825 /* mid_qual_coeffs.h in Headers */,
 				AF59268B25649C3000FC7825 /* IXNetSystem.h in Headers */,
 				AF5927A225649C3A00FC7825 /* iteration_proxy.hpp in Headers */,
@@ -3659,7 +3654,6 @@
 				AF59270C25649C3900FC7825 /* platform_folders.cpp in Sources */,
 				4F9A82F8213DE80400BE63A4 /* IPopupMenuControl.cpp in Sources */,
 				4F1A527B205D910000CF2908 /* IPlugVST2.cpp in Sources */,
-				AF1E3CBC256D71F90024199E /* build_config.h in Sources */,
 				4F8C10E120BA2796006320CD /* IGraphicsEditorDelegate.cpp in Sources */,
 				AFAD4629256495FF00EBB24D /* Straudio.cpp in Sources */,
 				4F6369DE20A464BB0022C370 /* IGraphicsNanoVG_src.m in Sources */,
@@ -3678,7 +3672,6 @@
 			files = (
 				AFAD462E256495FF00EBB24D /* Straudio.cpp in Sources */,
 				AF59271125649C3900FC7825 /* platform_folders.cpp in Sources */,
-				AF1E3CC1256D71F90024199E /* build_config.h in Sources */,
 				4F78BE3222E7429B00AD537E /* IPlugAUv3Appex.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -3691,7 +3684,6 @@
 				4F6369E020A464BB0022C370 /* IGraphicsNanoVG_src.m in Sources */,
 				4F6369EE20A466470022C370 /* IControl.cpp in Sources */,
 				4F1A528C205D916F00CF2908 /* IPlugAU.cpp in Sources */,
-				AF1E3CBE256D71F90024199E /* build_config.h in Sources */,
 				AFAD462B256495FF00EBB24D /* Straudio.cpp in Sources */,
 				4F63697020A463090022C370 /* IControls.cpp in Sources */,
 				4FD52131202A5B9B00A4D22A /* IPlugAU_view_factory.mm in Sources */,
@@ -3734,7 +3726,6 @@
 				4F3EE1D3231438D000004786 /* swell-wnd.mm in Sources */,
 				4F3EE1D4231438D000004786 /* swell.cpp in Sources */,
 				4F3EE1D5231438D000004786 /* IPlugAPP_host.cpp in Sources */,
-				AF1E3CC3256D71F90024199E /* build_config.h in Sources */,
 				4F3EE1D6231438D000004786 /* IPlugAPP.cpp in Sources */,
 				4F3EE1D7231438D000004786 /* IGraphics.cpp in Sources */,
 				AFAD4631256495FF00EBB24D /* Straudio.cpp in Sources */,
@@ -3763,7 +3754,6 @@
 				4F78BE1622E7406D00AD537E /* IGraphicsMac_view.mm in Sources */,
 				4F78BE1722E7406D00AD537E /* IGraphicsMac.mm in Sources */,
 				4F78BE1822E7406D00AD537E /* IGraphicsCoreText.mm in Sources */,
-				AF1E3CC2256D71F90024199E /* build_config.h in Sources */,
 				AFAD4630256495FF00EBB24D /* Straudio.cpp in Sources */,
 				4F78BE1922E7406D00AD537E /* ITextEntryControl.cpp in Sources */,
 				4F78BE1A22E7406D00AD537E /* IPopupMenuControl.cpp in Sources */,
@@ -3818,7 +3808,6 @@
 				4F81598A205D50EB00393585 /* ustring.cpp in Sources */,
 				4F815980205D50EB00393585 /* fobject.cpp in Sources */,
 				4F815994205D51F000393585 /* vstparameters.cpp in Sources */,
-				AF1E3CBD256D71F90024199E /* build_config.h in Sources */,
 				4F6369DF20A464BB0022C370 /* IGraphicsNanoVG_src.m in Sources */,
 				4F815991205D51F000393585 /* vstcomponentbase.cpp in Sources */,
 				AF59270D25649C3900FC7825 /* platform_folders.cpp in Sources */,
@@ -3847,7 +3836,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				AF59270F25649C3900FC7825 /* platform_folders.cpp in Sources */,
-				AF1E3CBF256D71F90024199E /* build_config.h in Sources */,
 				4F9A82FB213DE80400BE63A4 /* IPopupMenuControl.cpp in Sources */,
 				4F993F7523055C97000313AF /* IPlugProcessor.cpp in Sources */,
 				4FDAC0EE207D76C600299363 /* IPlugTimer.cpp in Sources */,
@@ -3917,7 +3905,6 @@
 				4FD16D4213B635AB001D0217 /* swell-wnd.mm in Sources */,
 				4FD16D4413B635B2001D0217 /* swell.cpp in Sources */,
 				4F690CA3203A45C700A4A13E /* IPlugAPP_host.cpp in Sources */,
-				AF1E3CBB256D71F90024199E /* build_config.h in Sources */,
 				4F1A5282205D913300CF2908 /* IPlugAPP.cpp in Sources */,
 				4F03A5AC20A4621100EBDFFB /* IGraphics.cpp in Sources */,
 				AFAD4628256495FF00EBB24D /* Straudio.cpp in Sources */,
@@ -3972,7 +3959,6 @@
 				4FFBB92420863B0E00DDD0E7 /* vstaudioeffect.cpp in Sources */,
 				4FFBB92520863B0E00DDD0E7 /* vstsinglecomponenteffect.cpp in Sources */,
 				4FFBB92620863B0E00DDD0E7 /* updatehandler.cpp in Sources */,
-				AF1E3CC0256D71F90024199E /* build_config.h in Sources */,
 				4FFBB92820863B0E00DDD0E7 /* vstcomponent.cpp in Sources */,
 				4FFBB92C20863B0E00DDD0E7 /* fstreamer.cpp in Sources */,
 				4FFBB92D20863B0E00DDD0E7 /* vstrepresentation.cpp in Sources */,

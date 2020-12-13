@@ -60,6 +60,7 @@ private:
 	RingBuffer _buffer;
 	float      _resampleOut[BUFFER_SIZE];
 	T          _uploadBuffer[BUFFER_SIZE];
+	float      _workerAudioBuffer[BUFFER_SIZE];
 	
 	// Resamples. if _updateRequired is true, updates itself
 	Resampler _resampler;
@@ -151,9 +152,7 @@ private:
 			
 			// pull data from the buffer
 			int nReadableSamples = _buffer.getNReadableSamples();
-			// TODO: FIXME ONCE WINDOWS VERSION BUILDS. THIS NEEDS TO BE A LARGE ARRAY INITIALIZED IN THE CLASS
-			float data[50000];
-			bool hasSound = _buffer.read(data, nReadableSamples);
+			bool hasSound = _buffer.read(_workerAudioBuffer, nReadableSamples);
 			
 			if (hasSound) _nSilentSamples = 0;
 			else _nSilentSamples += nReadableSamples;
@@ -163,7 +162,7 @@ private:
 				continue;
 			}
 			
-			int nOutputSamples = _resampler.resample(_resampleOut, data, nReadableSamples);
+			int nOutputSamples = _resampler.resample(_resampleOut, _workerAudioBuffer, nReadableSamples);
 			int dType          = (hasSound) ? _getDTypeBufferVal() : DTYPE_SILENCE;
 			int dataToTransmit = (hasSound) ? nOutputSamples * sizeof(T) + _getHeaderSize() : _getHeaderSize();
 			
