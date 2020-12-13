@@ -35,7 +35,7 @@ namespace rtc {
 class DtlsSrtpTransport;
 #endif
 
-class Track final : public std::enable_shared_from_this<Track>, public Channel {
+class RTC_CPP_EXPORT Track final : public std::enable_shared_from_this<Track>, public Channel {
 public:
 	Track(Description::Media description);
 	~Track() = default;
@@ -47,7 +47,7 @@ public:
 
 	void close(void) override;
 	bool send(message_variant data) override;
-	bool send(const byte *data, size_t size);
+	bool send(const byte *data, size_t size) override;
 
 	bool isOpen(void) const override;
 	bool isClosed(void) const override;
@@ -70,8 +70,8 @@ private:
 	std::weak_ptr<DtlsSrtpTransport> mDtlsSrtpTransport;
 #endif
 
-	bool outgoing(message_ptr message);
 	void incoming(message_ptr message);
+	bool outgoing(message_ptr message);
 
 	Description::Media mMediaDescription;
 	std::atomic<bool> mIsClosed = false;

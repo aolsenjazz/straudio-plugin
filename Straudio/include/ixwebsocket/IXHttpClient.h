@@ -34,6 +34,7 @@ namespace ix
 
         HttpResponsePtr post(const std::string& url,
                              const HttpParameters& httpParameters,
+                             const HttpFormDataParameters& httpFormDataParameters,
                              HttpRequestArgsPtr args);
         HttpResponsePtr post(const std::string& url,
                              const std::string& body,
@@ -41,6 +42,7 @@ namespace ix
 
         HttpResponsePtr put(const std::string& url,
                             const HttpParameters& httpParameters,
+                            const HttpFormDataParameters& httpFormDataParameters,
                             HttpRequestArgsPtr args);
         HttpResponsePtr put(const std::string& url,
                             const std::string& body,
@@ -48,6 +50,7 @@ namespace ix
 
         HttpResponsePtr patch(const std::string& url,
                               const HttpParameters& httpParameters,
+                              const HttpFormDataParameters& httpFormDataParameters,
                               HttpRequestArgsPtr args);
         HttpResponsePtr patch(const std::string& url,
                               const std::string& body,
@@ -58,7 +61,15 @@ namespace ix
                                 const std::string& body,
                                 HttpRequestArgsPtr args,
                                 int redirects = 0);
+
+        HttpResponsePtr request(const std::string& url,
+                                const std::string& verb,
+                                const HttpParameters& httpParameters,
+                                const HttpFormDataParameters& httpFormDataParameters,
+                                HttpRequestArgsPtr args);
+
         void setForceBody(bool value);
+
         // Async API
         HttpRequestArgsPtr createRequest(const std::string& url = std::string(),
                                          const std::string& verb = HttpClient::kGet);
@@ -89,10 +100,6 @@ namespace ix
 
     private:
         void log(const std::string& msg, HttpRequestArgsPtr args);
-
-#ifdef IXWEBSOCKET_USE_ZLIB
-        bool gzipInflate(const std::string& in, std::string& out);
-#endif
 
         // Async API background thread runner
         void run();

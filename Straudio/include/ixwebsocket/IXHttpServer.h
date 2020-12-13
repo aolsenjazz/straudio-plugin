@@ -23,15 +23,14 @@ namespace ix
     {
     public:
         using OnConnectionCallback =
-            std::function<HttpResponsePtr(HttpRequestPtr,
-                                          std::shared_ptr<ConnectionState>,
-                                          std::unique_ptr<ConnectionInfo> connectionInfo)>;
+            std::function<HttpResponsePtr(HttpRequestPtr, std::shared_ptr<ConnectionState>)>;
 
         HttpServer(int port = SocketServer::kDefaultPort,
                    const std::string& host = SocketServer::kDefaultHost,
                    int backlog = SocketServer::kDefaultTcpBacklog,
                    size_t maxConnections = SocketServer::kDefaultMaxConnections,
-                   int addressFamily = SocketServer::kDefaultAddressFamily);
+                   int addressFamily = SocketServer::kDefaultAddressFamily,
+                   int timeoutSecs = HttpServer::kDefaultTimeoutSecs);
         virtual ~HttpServer();
         virtual void stop() final;
 
@@ -39,15 +38,19 @@ namespace ix
 
         void makeRedirectServer(const std::string& redirectUrl);
 
+        void makeDebugServer();
+
     private:
         // Member variables
         OnConnectionCallback _onConnectionCallback;
         std::atomic<int> _connectedClientsCount;
 
+        const static int kDefaultTimeoutSecs;
+        int _timeoutSecs;
+
         // Methods
         virtual void handleConnection(std::unique_ptr<Socket>,
-                                      std::shared_ptr<ConnectionState> connectionState,
-                                      std::unique_ptr<ConnectionInfo> connectionInfo) final;
+                                      std::shared_ptr<ConnectionState> connectionState) final;
         virtual size_t getConnectedClientsCount() final;
 
         void setDefaultConnectionCallback();

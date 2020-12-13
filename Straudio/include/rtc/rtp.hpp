@@ -20,7 +20,7 @@
 #ifndef RTC_RTP_HPP
 #define RTC_RTP_HPP
 
-#include <rtc/log.hpp>
+#include "log.hpp"
 
 #include <cmath>
 
@@ -66,28 +66,31 @@ public:
 	inline uint32_t ssrc() const { return ntohl(_ssrc); }
 
 	inline size_t getSize() const {
-		return ((char *)&csrc) - ((char *)this) + sizeof(SSRC) * csrcCount();
+		return reinterpret_cast<const char *>(&csrc) - reinterpret_cast<const char *>(this) +
+		       sizeof(SSRC) * csrcCount();
 	}
 
-	char *getBody() const { return ((char *)&csrc) + sizeof(SSRC) * csrcCount(); }
+	[[nodiscard]] char *getBody() {
+		return reinterpret_cast<char *>(&csrc) + sizeof(SSRC) * csrcCount();
+	}
+
+	[[nodiscard]] const char *getBody() const {
+		return reinterpret_cast<const char *>(&csrc) + sizeof(SSRC) * csrcCount();
+	}
 
 	inline void setSeqNumber(uint16_t newSeqNo) { _seqNumber = htons(newSeqNo); }
 	inline void setPayloadType(uint8_t newPayloadType) {
 		_payloadType = (_payloadType & 0b10000000u) | (0b01111111u & newPayloadType);
 	}
-	inline void setSsrc(uint32_t ssrc) { _ssrc = htonl(ssrc); }
+	inline void setSsrc(uint32_t in_ssrc) { _ssrc = htonl(in_ssrc); }
 
 	void setTimestamp(uint32_t i) { _timestamp = htonl(i); }
 
 	void log() {
-		PLOG_VERBOSE  << "RTP V: " << (int) version()
-		            << " P: " << (padding() ? "P" : " ")
-		            << " X: " << (extension() ? "X" : " ")
-		            << " CC: "  << (int) csrcCount()
-		            << " M: " << (marker() ? "M" : " ")
-		            << " PT: " << (int) payloadType()
-		            << " SEQNO: " << seqNumber()
-		            << " TS: " << timestamp();
+		PLOG_VERBOSE << "RTP V: " << (int)version() << " P: " << (padding() ? "P" : " ")
+		             << " X: " << (extension() ? "X" : " ") << " CC: " << (int)csrcCount()
+		             << " M: " << (marker() ? "M" : " ") << " PT: " << (int)payloadType()
+		             << " SEQNO: " << seqNumber() << " TS: " << timestamp();
 	}
 };
 
@@ -103,13 +106,13 @@ private:
 	uint32_t _delaySinceLastReport;
 
 public:
-	inline void preparePacket(SSRC ssrc, [[maybe_unused]] unsigned int packetsLost,
+	inline void preparePacket(SSRC in_ssrc, [[maybe_unused]] unsigned int packetsLost,
 	                          [[maybe_unused]] unsigned int totalPackets, uint16_t highestSeqNo,
 	                          uint16_t seqNoCycles, uint32_t jitter, uint64_t lastSR_NTP,
 	                          uint64_t lastSR_DELAY) {
 		setSeqNo(highestSeqNo, seqNoCycles);
 		setJitter(jitter);
-		setSSRC(ssrc);
+		setSSRC(in_ssrc);
 
 		// Middle 32 bits of NTP Timestamp
 		//		  this->lastReport = lastSR_NTP >> 16u;
@@ -117,22 +120,23 @@ public:
 		setDelaySinceSR(uint32_t(lastSR_DELAY));
 
 		// The delay, expressed in units of 1/65536 seconds
-		//		  this->delaySinceLastReport = lastSR_DELAY;
+		// this->delaySinceLastReport = lastSR_DELAY;
 	}
 
-	inline void setSSRC(SSRC ssrc) { this->ssrc = htonl(ssrc); }
-	inline SSRC getSSRC() const { return ntohl(ssrc); }
+	inline void setSSRC(SSRC in_ssrc) { this->ssrc = htonl(in_ssrc); }
+	[[nodiscard]] inline SSRC getSSRC() const { return ntohl(ssrc); }
 
 	inline void setPacketsLost([[maybe_unused]] unsigned int packetsLost,
 	                           [[maybe_unused]] unsigned int totalPackets) {
 		// TODO Implement loss percentages.
 		_fractionLostAndPacketsLost = 0;
 	}
-	inline unsigned int getLossPercentage() const {
+
+	[[nodiscard]] inline unsigned int getLossPercentage() const {
 		// TODO Implement loss percentages.
 		return 0;
 	}
-	inline unsigned int getPacketLostCount() const {
+	[[nodiscard]] inline unsigned int getPacketLostCount() const {
 		// TODO Implement total packets lost.
 		return 0;
 	}
@@ -149,13 +153,13 @@ public:
 	inline void setJitter(uint32_t jitter) { _jitter = htonl(jitter); }
 
 	inline void setNTPOfSR(uint64_t ntp) { _lastReport = htonll(ntp >> 16u); }
-	inline uint32_t getNTPOfSR() const { return ntohl(_lastReport) << 16u; }
+	[[nodiscard]] inline uint32_t getNTPOfSR() const { return ntohl(_lastReport) << 16u; }
 
 	inline void setDelaySinceSR(uint32_t sr) {
 		// The delay, expressed in units of 1/65536 seconds
 		_delaySinceLastReport = htonl(sr);
 	}
-	inline uint32_t getDelaySinceSR() const { return ntohl(_delaySinceLastReport); }
+	[[nodiscard]] inline uint32_t getDelaySinceSR() const { return ntohl(_delaySinceLastReport); }
 
 	inline void log() const {
 		PLOG_VERBOSE << "RTCP report block: "
@@ -199,9 +203,9 @@ public:
 
 	inline void log() const {
 		PLOG_VERBOSE << "RTCP header: "
-		          << "version=" << unsigned(version()) << ", padding=" << padding()
-		          << ", reportCount=" << unsigned(reportCount())
-		          << ", payloadType=" << unsigned(payloadType()) << ", length=" << length();
+		             << "version=" << unsigned(version()) << ", padding=" << padding()
+		             << ", reportCount=" << unsigned(reportCount())
+		             << ", payloadType=" << unsigned(payloadType()) << ", length=" << length();
 	}
 };
 
@@ -246,8 +250,10 @@ public:
 		this->_senderSSRC = htonl(senderSSRC);
 	}
 
-	inline RTCP_ReportBlock *getReportBlock(int num) { return &_reportBlocks + num; }
-	inline const RTCP_ReportBlock *getReportBlock(int num) const { return &_reportBlocks + num; }
+	[[nodiscard]] inline RTCP_ReportBlock *getReportBlock(int num) { return &_reportBlocks + num; }
+	[[nodiscard]] inline const RTCP_ReportBlock *getReportBlock(int num) const {
+		return &_reportBlocks + num;
+	}
 
 	[[nodiscard]] inline size_t getSize() const {
 		// "length" in packet is one less than the number of 32 bit words in the packet.
@@ -284,8 +290,10 @@ private:
 	RTCP_ReportBlock _reportBlocks;
 
 public:
-	inline RTCP_ReportBlock *getReportBlock(int num) { return &_reportBlocks + num; }
-	inline const RTCP_ReportBlock *getReportBlock(int num) const { return &_reportBlocks + num; }
+	[[nodiscard]] inline RTCP_ReportBlock *getReportBlock(int num) { return &_reportBlocks + num; }
+	[[nodiscard]] inline const RTCP_ReportBlock *getReportBlock(int num) const {
+		return &_reportBlocks + num;
+	}
 
 	inline SSRC senderSSRC() const { return ntohl(_senderSSRC); }
 	inline void setSenderSSRC(SSRC ssrc) { this->_senderSSRC = htonl(ssrc); }
@@ -337,7 +345,7 @@ struct RTCP_REMB {
 		return sizeof(uint32_t) * (1 + header.header.length());
 	}
 
-	void preparePacket(SSRC senderSSRC, unsigned int numSSRC, unsigned int bitrate) {
+	void preparePacket(SSRC senderSSRC, unsigned int numSSRC, unsigned int in_bitrate) {
 
 		// Report Count becomes the format here.
 		header.header.prepareHeader(206, 15, 0);
@@ -352,21 +360,21 @@ struct RTCP_REMB {
 		id[2] = 'M';
 		id[3] = 'B';
 
-		setBitrate(numSSRC, bitrate);
+		setBitrate(numSSRC, in_bitrate);
 	}
 
-	void setBitrate(unsigned int numSSRC, unsigned int bitrate) {
+	void setBitrate(unsigned int numSSRC, unsigned int in_bitrate) {
 		unsigned int exp = 0;
-		while (bitrate > pow(2, 18) - 1) {
+		while (in_bitrate > pow(2, 18) - 1) {
 			exp++;
-			bitrate /= 2;
+			in_bitrate /= 2;
 		}
 
 		// "length" in packet is one less than the number of 32 bit words in the packet.
 		header.header.setLength(
 		    uint16_t((offsetof(RTCP_REMB, ssrc) / sizeof(uint32_t)) - 1 + numSSRC));
 
-		this->bitrate = htonl((numSSRC << (32u - 8u)) | (exp << (32u - 8u - 6u)) | bitrate);
+		this->bitrate = htonl((numSSRC << (32u - 8u)) | (exp << (32u - 8u - 6u)) | in_bitrate);
 	}
 
 	void setSsrc(int iterator, SSRC newSssrc) { ssrc[iterator] = htonl(newSssrc); }
@@ -428,7 +436,7 @@ public:
 
 public:
 	void preparePacket(SSRC ssrc, unsigned int discreteSeqNoCount) {
-		header.header.prepareHeader(205, 1, 2 + discreteSeqNoCount);
+		header.header.prepareHeader(205, 1, 2 + uint16_t(discreteSeqNoCount));
 		header.setMediaSourceSSRC(ssrc);
 		header.setPacketSenderSSRC(ssrc);
 	}
@@ -442,7 +450,7 @@ public:
 	 * @param missingPacket The seq no of the missing packet. This will be added to the queue.
 	 * @return true if the packet has grown, false otherwise.
 	 */
-	bool addMissingPacket(unsigned int *fciCount, uint16_t *fciPID, const uint16_t &missingPacket) {
+	bool addMissingPacket(unsigned int *fciCount, uint16_t *fciPID, uint16_t missingPacket) {
 		if (*fciCount == 0 || missingPacket < *fciPID || missingPacket > (*fciPID + 16)) {
 			parts[*fciCount].pid = htons(missingPacket);
 			parts[*fciCount].blp = 0;
@@ -451,8 +459,9 @@ public:
 			return true;
 		} else {
 			// TODO SPEEED!
-			parts[(*fciCount) - 1].blp = htons(ntohs(parts[(*fciCount) - 1].blp) |
-			                                   (1u << (unsigned int)(missingPacket - *fciPID)));
+			auto blp = ntohs(parts[(*fciCount) - 1].blp);
+			auto newBit = 1u << (unsigned int)(missingPacket - (1 + *fciPID));
+			parts[(*fciCount) - 1].blp = htons(blp | newBit);
 			return false;
 		}
 	}
@@ -481,11 +490,15 @@ public:
 		return ntohs(*(uint16_t *)(header.getBody()));
 	}
 
-	char *getBody() { return header.getBody() + sizeof(uint16_t); }
+	[[nodiscard]] char *getBody() { return header.getBody() + sizeof(uint16_t); }
 
-	size_t getBodySize(size_t totalSize) { return totalSize - ((char *)getBody() - (char *)this); }
+	[[nodiscard]] const char *getBody() const { return header.getBody() + sizeof(uint16_t); }
 
-	RTP &getHeader() { return header; }
+	[[nodiscard]] size_t getBodySize(size_t totalSize) {
+		return totalSize - (getBody() - reinterpret_cast<char *>(this));
+	}
+
+	[[nodiscard]] RTP &getHeader() { return header; }
 
 	size_t normalizePacket(size_t totalSize, SSRC originalSSRC, uint8_t originalPayloadType) {
 		header.setSeqNumber(getOriginalSeqNo());

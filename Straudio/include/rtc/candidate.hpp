@@ -25,7 +25,7 @@
 
 namespace rtc {
 
-class Candidate {
+class RTC_CPP_EXPORT Candidate {
 public:
 	enum class Family { Unresolved, Ipv4, Ipv6 };
 	enum class Type { Unknown, Host, ServerReflexive, PeerReflexive, Relayed };
@@ -40,35 +40,44 @@ public:
 	enum class ResolveMode { Simple, Lookup };
 	bool resolve(ResolveMode mode = ResolveMode::Simple);
 
+	Type type() const;
+	TransportType transportType() const;
+	uint32_t priority() const;
 	string candidate() const;
 	string mid() const;
 	operator string() const;
 
+	bool operator==(const Candidate &other) const;
+	bool operator!=(const Candidate &other) const;
+
 	bool isResolved() const;
 	Family family() const;
-	Type type() const;
-	TransportType transportType() const;
 	std::optional<string> address() const;
 	std::optional<uint16_t> port() const;
-	std::optional<uint32_t> priority() const;
 
 private:
-	string mCandidate;
+	void parse(string candidate);
+
+	string mFoundation;
+	uint32_t mComponent, mPriority;
+	string mTypeString, mTransportString;
+	Type mType;
+	TransportType mTransportType;
+	string mNode, mService;
+	string mTail;
+
 	std::optional<string> mMid;
 
 	// Extracted on resolution
 	Family mFamily;
-	Type mType;
-	TransportType mTransportType;
 	string mAddress;
 	uint16_t mPort;
-	uint32_t mPriority;
 };
 
 } // namespace rtc
 
-std::ostream &operator<<(std::ostream &out, const rtc::Candidate &candidate);
-std::ostream &operator<<(std::ostream &out, const rtc::Candidate::Type &type);
-std::ostream &operator<<(std::ostream &out, const rtc::Candidate::TransportType &transportType);
+RTC_CPP_EXPORT std::ostream &operator<<(std::ostream &out, const rtc::Candidate &candidate);
+RTC_CPP_EXPORT std::ostream &operator<<(std::ostream &out, const rtc::Candidate::Type &type);
+RTC_CPP_EXPORT std::ostream &operator<<(std::ostream &out, const rtc::Candidate::TransportType &transportType);
 
 #endif
