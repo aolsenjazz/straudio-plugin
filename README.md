@@ -20,15 +20,15 @@ git clone https://github.com/aolsenjazz/straudio-plugin
 
 All dependencies must be static libraries as plugin hosts do not like dynamic libraries. Dependencies should be placed in the Straudio/libs folder.
 
-[LibCrypto](https://wiki.openssl.org/index.php/Libcrypto_API)
-[LibDataChannel](https://github.com/paullouisageneau/libdatachannel)
-[IXWebSocket](https://github.com/machinezone/IXWebSocket)
-[Juice](https://github.com/paullouisageneau/libjuice)
-[Nettle](https://www.lysator.liu.se/~nisse/nettle/)
-[LibSampleRate](http://www.mega-nerd.com/SRC/)
-LibSrtp2
-[LibSSL](https://wiki.openssl.org/index.php/Libssl_API)
-[Libusrsctp](https://github.com/sctplab/usrsctp)
+- [LibCrypto](https://wiki.openssl.org/index.php/Libcrypto_API)
+- [LibDataChannel](https://github.com/paullouisageneau/libdatachannel)
+- [IXWebSocket](https://github.com/machinezone/IXWebSocket)
+- [Juice](https://github.com/paullouisageneau/libjuice)
+- [Nettle](https://www.lysator.liu.se/~nisse/nettle/)
+- [LibSampleRate](http://www.mega-nerd.com/SRC/)
+- LibSrtp2
+- [LibSSL](https://wiki.openssl.org/index.php/Libssl_API)
+- [Libusrsctp](https://github.com/sctplab/usrsctp)
 
 ### Install iPlug2
 
