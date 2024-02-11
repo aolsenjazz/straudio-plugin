@@ -1,4 +1,7 @@
-# Straudio (plugin)
+# DEPRECATED
+There are now cheap or free options on the market which solve the problems Straudio used to solve, so this repository is now archived.
+
+## Straudio (plugin)
 
 An audio plugin built with [iPlug2](https://github.com/iPlug2/iPlug2) which sends audio from DAW to browser via [WebRTC](https://webrtc.org/) Datachannel. The web client for use with the Straudio plugin can be found [here](https://github.com/aolsenjazz/straudio-web).
 
