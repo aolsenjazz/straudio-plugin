@@ -1,4 +1,4 @@
-# DEPRECATED
+# ARCHIVED
 There are now cheap or free options on the market which solve the problems Straudio used to solve, so this repository is now archived.
 
 ## Straudio (plugin)
